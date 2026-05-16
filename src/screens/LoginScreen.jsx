@@ -1,0 +1,69 @@
+// src/screens/LoginScreen.jsx
+// ═══════════════════════════════════════════════════════════════
+//  RESPONSABLE: [Nombre del Amigo 1]
+//  RUTA:        /login
+//  DESCRIPCIÓN: Pantalla de inicio de sesión.
+//
+//  Para navegar a otras pantallas usa useNavigate():
+//    navigate('/home')     → va al home
+//    navigate('/registro') → va al registro
+// ═══════════════════════════════════════════════════════════════
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+export default function LoginScreen() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  function handleLogin() {
+    // TODO: agregar validación y lógica de autenticación aquí
+    navigate('/home');
+  }
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      
+      {/* ↓↓↓ REEMPLAZA TODO ESTE BLOQUE CON TU DISEÑO ↓↓↓ */}
+      <div style={{ textAlign: 'center', padding: '40px', background: '#fff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', minWidth: '320px' }}>
+        <div style={{ fontSize: '48px', marginBottom: '8px' }}>🌿</div>
+        <h2 style={{ marginBottom: '8px', color: '#1a6b4a' }}>Iniciar Sesión</h2>
+        <p style={{ color: '#7aab90', marginBottom: '24px', fontSize: '14px' }}>
+          [Pantalla pendiente — Amigo 1]
+        </p>
+
+        <input
+          type="email"
+          placeholder="Correo electrónico"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          style={{ display: 'block', width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #c6eadb', fontFamily: 'inherit' }}
+        />
+        <input
+          type="password"
+          placeholder="Contraseña"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          style={{ display: 'block', width: '100%', padding: '12px', marginBottom: '20px', borderRadius: '8px', border: '1px solid #c6eadb', fontFamily: 'inherit' }}
+        />
+
+        <button
+          onClick={handleLogin}
+          style={{ width: '100%', padding: '14px', background: '#1a6b4a', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', marginBottom: '12px' }}
+        >
+          Entrar
+        </button>
+
+        <button
+          onClick={() => navigate('/registro')}
+          style={{ background: 'none', border: 'none', color: '#2d9b6f', fontWeight: '700', cursor: 'pointer', fontSize: '14px' }}
+        >
+          ¿No tienes cuenta? Regístrate
+        </button>
+      </div>
+      {/* ↑↑↑ HASTA AQUÍ ↑↑↑ */}
+
+    </div>
+  );
+}
