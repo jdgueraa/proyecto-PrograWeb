@@ -11,7 +11,8 @@ export const ongs = [
     seguidores: 1240,
     campañas: 3,
     color: "#d4f5e9",
-    banner: "linear-gradient(135deg, #2d9b6f, #0f9f8a)"
+    banner: "linear-gradient(135deg, #2d9b6f, #0f9f8a)",
+    featured: false // Estado destacado para HomeScreen
   },
   {
     id: 2,
@@ -23,7 +24,8 @@ export const ongs = [
     seguidores: 870,
     campañas: 5,
     color: "#e0f2fe",
-    banner: "linear-gradient(135deg, #0284c7, #0ea5e9)"
+    banner: "linear-gradient(135deg, #0284c7, #0ea5e9)",
+    featured: false // Estado destacado para HomeScreen
   },
   {
     id: 3,
@@ -35,7 +37,8 @@ export const ongs = [
     seguidores: 1950,
     campañas: 2,
     color: "#fee2e2",
-    banner: "linear-gradient(135deg, #ef4444, #f43f5e)"
+    banner: "linear-gradient(135deg, #ef4444, #f43f5e)",
+    featured: true // Estado destacado para HomeScreen
   }
 ];
 
@@ -48,7 +51,8 @@ export const campañas = [
     actual: 11200,
     badge: "Activa",
     badgeClass: "badge-active",
-    desc: "Reforestación urgente de zonas deforestadas por minería ilegal."
+    desc: "Reforestación urgente de zonas deforestadas por minería ilegal.",
+    urgent: true // Estado urgente para HomeScreen
   },
   {
     name: "Biblioteca comunitaria en Ollantaytambo",
@@ -56,6 +60,7 @@ export const campañas = [
     actual: 8300,
     badge: "¡Lograda!",
     badgeClass: "badge-success",
-    desc: "Implementación de estanterías, libros y computadoras para niños de la zona."
+    desc: "Implementación de estanterías, libros y computadoras para niños de la zona.",
+    urgent: false // Estado urgente para HomeScreen
   }
 ];
