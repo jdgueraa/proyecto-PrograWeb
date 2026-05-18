@@ -1,63 +1,78 @@
 // src/screens/HomeScreen.jsx
-// ═══════════════════════════════════════════════════════════════
-//  RESPONSABLE: [Nombre del Amigo 2]
-//  RUTA:        /home
-//  DESCRIPCIÓN: Pantalla principal que ve el usuario al entrar.
-//               Puede mostrar ONGs destacadas, campañas recientes,
-//               estadísticas, etc.
-//
-//  Datos disponibles en src/data.jsx:
-//    import { ongs, campañas, categories } from '../data';
-//
-//  Para navegar usa useNavigate():
-//    navigate('/buscar')      → va al buscador
-//    navigate('/perfil/1')    → va al perfil de una ONG
-// ═══════════════════════════════════════════════════════════════
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ongs, campañas } from '../data';
 
+import CampaignCard from '../components/CampaignCard';
+import FeaturedOng from '../components/FeaturedOng';
+import '../App.css';
+
 export default function HomeScreen() {
   const navigate = useNavigate();
 
+  // Buscar la ONG destacada de la semana
+  const ongDestacada = ongs.find(o => o.featured === true) || ongs[0];
+
+  const campañasUrgentes = campañas.filter(c => c.urgent === true);
+
   return (
-    <div className="fade-in">
-
-      {/* ↓↓↓ REEMPLAZA TODO ESTE BLOQUE CON TU DISEÑO ↓↓↓ */}
-      <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-        <div style={{ fontSize: '64px', marginBottom: '16px' }}>🏠</div>
-        <h1 style={{ fontSize: '32px', color: '#1a6b4a', marginBottom: '8px' }}>
-          Pantalla Principal
-        </h1>
-        <p style={{ color: '#7aab90', marginBottom: '32px' }}>
-          [Pantalla pendiente — Amigo 2] <br/>
-          Aquí va lo que ve el usuario al entrar: ONGs destacadas, campañas, novedades, etc.
+    <div className="fade-in home-screen-wrapper">
+      
+      {/* 1. SECTION PRINCIPAL */}
+      <div className="home-principal">
+        <h1 className="home-screen-principal-title">Transforma realidades en el Perú</h1>
+        <p className="home-screen-principal-subtitle">
+          Apoya causas urgentes, encuentra voluntariados locales y conéctate con las organizaciones que están liderando el cambio en nuestro país.
         </p>
-
-        {/* Botón de ejemplo para probar navegación */}
-        <button
-          onClick={() => navigate('/buscar')}
-          style={{ padding: '14px 28px', background: '#1a6b4a', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer', fontSize: '15px' }}
-        >
-          🔍 Ir al buscador
+        <button onClick={() => navigate('/buscar')} className="home-screen-principal-btn">
+          🔍 Ir al buscador de ONGs
         </button>
+      </div>
+      <br></br>
 
-        {/* Datos disponibles para usar — puedes borrar esto */}
-        <div style={{ marginTop: '48px', textAlign: 'left', maxWidth: '600px', margin: '48px auto 0' }}>
-          <p style={{ fontWeight: '700', color: '#3d6b55', marginBottom: '12px' }}>
-            Datos que puedes usar (importados de data.jsx):
-          </p>
-          <pre style={{ background: '#f0faf5', padding: '16px', borderRadius: '8px', fontSize: '13px', color: '#0f2d1f', overflowX: 'auto' }}>
-{`ongs (${ongs.length} organizaciones):
-${ongs.map(o => `  • ${o.name} — ${o.location}`).join('\n')}
-
-campañas (${campañas.length} campañas):
-${campañas.map(c => `  • ${c.name}`).join('\n')}`}
-          </pre>
+      {/* 2. IMPACTO EN CIFRAS */}
+      <div className="home-screen-stats-grid">
+        <div className="home-screen-stat-card">
+          <span>🏢</span>
+          <h3 className="home-screen-stat-number">{ongs.length}</h3>
+          <p className="home-screen-stat-label">Organizaciones Aliadas</p>
+        </div>
+        <div className="home-screen-stat-card">
+          <span>🌍</span>
+          <h3 className="home-screen-stat-number">4</h3>
+          <p className="home-screen-stat-label">Regiones Impactadas</p>
+        </div>
+        <div className="home-screen-stat-card">
+          <span>🤝</span>
+          <h3 className="home-screen-stat-number">{campañas.length}</h3>
+          <p className="home-screen-stat-label">Campañas Activas</p>
         </div>
       </div>
-      {/* ↑↑↑ HASTA AQUÍ ↑↑↑ */}
+
+      {/* 3. SECCIÓN: CAMPAÑAS URGENTES */}
+      <div style={{ marginBottom: '40px' }}>
+        <div className="home-screen-section-header">
+          <h2 className="home-screen-section-title">🔥 Campañas Urgentes</h2>
+          <span className="home-screen-section-tag">Necesitan apoyo esta semana</span>
+        </div>
+
+        <div className="home-screen-campaigns-grid">
+          {/* Mapeamos el nuevo arreglo filtrado */}
+          {campañasUrgentes.map((campaña) => (
+            <CampaignCard 
+              key={campaña.id} 
+              campaña={campaña} 
+              onAction={() => navigate('/buscar')} 
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 4. SECCIÓN: ONG DESTACADA DE LA SEMANA */}
+      <FeaturedOng 
+        ong={ongDestacada} 
+        onNavigate={() => navigate(`/perfil/${ongDestacada?.id || 1}`)} 
+      />
 
     </div>
   );
