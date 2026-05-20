@@ -18,6 +18,7 @@ import RegisterScreen from './screens/RegisterScreen.jsx';
 
 // Amigo 2: Pantalla principal (Home) → trabajar en src/screens/HomeScreen.jsx
 import HomeScreen from './screens/HomeScreen.jsx';
+import MyProfileScreen from './screens/MyProfileScreen.jsx'; // Tu pantalla de perfil personal
 // ────────────────────────────────────────────────────────────────
 
 
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="/home"       element={<AppLayout><HomeScreen /></AppLayout>} />
         <Route path="/buscar"     element={<AppLayout><SearchScreen /></AppLayout>} />
         <Route path="/perfil/:id" element={<AppLayout><ProfileScreen /></AppLayout>} />
+        <Route path="/MiPerfil"   element={<AppLayout><MyProfileScreen /></AppLayout>} />
 
       </Routes>
     </BrowserRouter>

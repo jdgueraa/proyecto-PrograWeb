@@ -10,7 +10,7 @@ export default function Sidebar() {
     { icon: "🔍", label: "Buscar",      path: "/buscar" },
     { icon: "❤️", label: "Donaciones",  path: null },
     { icon: "🤝", label: "Voluntariado",path: null },
-    { icon: "👤", label: "Mi perfil",   path: null },
+    { icon: "👤", label: "Mi perfil",   path: "/MiPerfil" },
   ];
 
   return (
