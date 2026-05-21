@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { ongs, campañas } from '../data'; // Asegúrate de que la ruta a tu data.jsx sea correcta
 
-export default function MyProfileScreen() {
+export default function MyProfileScreen({ user }) {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('actividad');
 
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
     // Datos simulados del perfil del usuario actual (puedes cambiarlos luego)
+    const isDefaultProfile = user.email?.toLowerCase() === 'amante.de.gatitos55@example.com';
     const usuarioLogueado = {
-        username: "AmanteDeGatitos55",
-        biografia: "Lo que disfruto es poder ayudar a la gente",
-        fotoUrl: "https://img.buzzfeed.com/buzzfeed-static/static/2025-03/13/18/subbuzz/UjLcjUoUE0.jpg?downsize=700%3A%2A&output-quality=auto&output-format=auto", // Un lindo gatito temporal para tu diseño
+        fullName: user.fullName || user.username || (user.email || '').split('@')[0],
+        username: user.username || (user.email || '').split('@')[0],
+        biografia: isDefaultProfile ? "Lo que disfruto es poder ayudar a la gente" : '',
+        fotoUrl: isDefaultProfile
+            ? "https://img.buzzfeed.com/buzzfeed-static/static/2025-03/13/18/subbuzz/UjLcjUoUE0.jpg?downsize=700%3A%2A&output-quality=auto&output-format=auto"
+            : '',
         bannerUrl: "https://www.revista-ballesol.com/wp-content/uploads/2024/02/ONG-840x559.jpg", // Imagen de fondo para el banner
         // Simulamos que el usuario sigue a las ONGs con ID 1 y 3 de tu data.jsx
         ongsSeguidasIds: [1, 3],
@@ -30,14 +38,20 @@ export default function MyProfileScreen() {
                 <div className="profile-banner" style={{ backgroundImage: `url(${usuarioLogueado.bannerUrl})` }}></div>
                 <div className="profile-info-strip">
                     <div className="profile-avatar-container">
-                        <img src={usuarioLogueado.fotoUrl} alt="Avatar" className="profile-avatar" />
+                        {usuarioLogueado.fotoUrl ? (
+                          <img src={usuarioLogueado.fotoUrl} alt="Avatar" className="profile-avatar" />
+                        ) : (
+                          <div className="profile-avatar profile-avatar-empty" aria-label="Avatar vacío"></div>
+                        )}
                         <button className="profile-btn-edit-photo" title="Cambiar foto de perfil">
                             +
                         </button>
                     </div>
                     <div className="profile-text">
-                        <h2>{usuarioLogueado.username}</h2>
-                        <p>"{usuarioLogueado.biografia}"</p>
+                        <h2>{usuarioLogueado.fullName}</h2>
+                        {usuarioLogueado.biografia ? (
+                          <p>"{usuarioLogueado.biografia}"</p>
+                        ) : null}
                     </div>
                 </div>
             </div>
