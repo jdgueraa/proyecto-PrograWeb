@@ -12,13 +12,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function LoginScreen() {
+export default function LoginScreen({ onLogin }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   function handleLogin() {
-    // TODO: agregar validación y lógica de autenticación aquí
+    setError('');
+    const errorMessage = onLogin(email, password);
+    if (errorMessage) {
+      setError(errorMessage);
+      return;
+    }
+
     navigate('/home');
   }
 
@@ -30,8 +37,14 @@ export default function LoginScreen() {
         <div style={{ fontSize: '48px', marginBottom: '8px' }}>🌿</div>
         <h2 style={{ marginBottom: '8px', color: '#1a6b4a' }}>Iniciar Sesión</h2>
         <p style={{ color: '#7aab90', marginBottom: '24px', fontSize: '14px' }}>
-          [Pantalla pendiente — Amigo 1]
+          Ingresa tus datos para continuar.
         </p>
+
+        {error && (
+          <div style={{ marginBottom: '16px', color: '#b91c1c', fontWeight: 700 }}>
+            {error}
+          </div>
+        )}
 
         <input
           type="email"
