@@ -21,12 +21,14 @@ import HomeScreen from './screens/HomeScreen.jsx';
 import MyProfileScreen from './screens/MyProfileScreen.jsx'; // Tu pantalla de perfil personal
 // ────────────────────────────────────────────────────────────────
 
+// SCREEN ONG  (Santiago)
+import AdminScreen from './screens/AdminScreen';
 
 // Layout con sidebar para las pantallas internas
-function AppLayout({ children }) {
+function AppLayout({ children, user }) {
   return (
     <div className="app-layout">
-      <Sidebar />
+  <Sidebar user={user} />
       <main className="main-content">
         {children}
       </main>
@@ -44,28 +46,27 @@ export default function App() {
     username: 'amante de gatitos55',
   };
 
-  function handleLogin(email, password) {
-    const trimmedEmail = email.trim().toLowerCase();
-    if (!trimmedEmail || !password) {
-      return 'Por favor ingresa correo y contraseña.';
-    }
+function handleLogin(email, password) {
+  const trimmedEmail = email.trim().toLowerCase();
 
-    const storedEmail = localStorage.getItem('userEmail');
-    const storedPassword = localStorage.getItem('userPassword');
-    const storedFullName = localStorage.getItem('userFullName');
-
-    if (storedEmail && trimmedEmail === storedEmail && password === storedPassword) {
-      setAuthUser({ username: storedEmail.split('@')[0], fullName: storedFullName || storedEmail, email: storedEmail });
-      return '';
-    }
-
-    if (trimmedEmail === defaultUser.email && password === defaultUser.password) {
-      setAuthUser({ username: defaultUser.username, fullName: defaultUser.fullName, email: defaultUser.email });
-      return '';
-    }
-
-    return 'Usuario o contraseña incorrectos.';
+  if (!trimmedEmail || !password) {
+    return 'Ingresa correo y contraseña.';
   }
+
+  const storedUser =
+    JSON.parse(localStorage.getItem('registeredUser'));
+
+  if (
+    storedUser &&
+    trimmedEmail === storedUser.email &&
+    password === storedUser.password
+  ) {
+    setAuthUser(storedUser);
+    return '';
+  }
+
+  return 'Usuario o contraseña incorrectos.';
+}
 
   return (
     <BrowserRouter>
@@ -77,20 +78,11 @@ export default function App() {
         <Route path="/registro" element={<RegisterScreen />} />
 
         {/* ── CON SIDEBAR ── */}
-        <Route path="/home"       element={<AppLayout><HomeScreen /></AppLayout>} />
+        <Route path="/home" element={ <AppLayout user={authUser}> <HomeScreen /></AppLayout>}/>
         <Route path="/buscar"     element={<AppLayout><SearchScreen /></AppLayout>} />
         <Route path="/perfil/:id" element={<AppLayout><ProfileScreen /></AppLayout>} />
-        <Route
-          path="/MiPerfil"
-          element={
-            authUser ? (
-              <AppLayout><MyProfileScreen user={authUser} /></AppLayout>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-
+        <Route path="/MiPerfil" element={ authUser ? (<AppLayout><MyProfileScreen user={authUser} /></AppLayout>) : (<Navigate to="/login" replace />)}/>
+        <Route path="/admin" element= {authUser?.role === 'ong' ? (<AppLayout user={authUser}><AdminScreen /></AppLayout>) : (<Navigate to="/home" replace />)}/>
       </Routes>
     </BrowserRouter>
   );

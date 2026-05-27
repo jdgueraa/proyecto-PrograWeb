@@ -18,29 +18,42 @@ export default function RegisterScreen() {
   const [password, setPassword]   = useState('');
   const [error, setError]         = useState('');
   const [success, setSuccess]     = useState('');
+  const [accountType, setAccountType] = useState('user');
 
-  function handleRegister() {
-    setError('');
-    setSuccess('');
+function handleRegister() {
+  setError('');
+  setSuccess('');
 
-    if (!nombre.trim() || !email.trim() || !password) {
-      setError('Completa todos los campos para crear tu cuenta.');
-      return;
-    }
-
-    const emailValue = email.trim().toLowerCase();
-    if (!emailValue.includes('@') || !emailValue.includes('.')) {
-      setError('Ingresa un correo válido.');
-      return;
-    }
-
-    localStorage.setItem('userFullName', nombre.trim());
-    localStorage.setItem('userEmail', emailValue);
-    localStorage.setItem('userPassword', password);
-
-    setSuccess('Cuenta creada. Ahora puedes iniciar sesión.');
-    setTimeout(() => navigate('/login'), 1200);
+  if (!nombre.trim() || !email.trim() || !password) {
+    setError('Completa todos los campos.');
+    return;
   }
+
+  const emailValue = email.trim().toLowerCase();
+
+  if (!emailValue.includes('@') || !emailValue.includes('.')) {
+    setError('Correo inválido.');
+    return;
+  }
+
+  const userData = {
+    fullName: nombre.trim(),
+    email: emailValue,
+    password,
+    role: accountType,
+  };
+
+  localStorage.setItem('registeredUser', JSON.stringify(userData));
+
+  setSuccess(
+    accountType === 'ong'
+      ? 'Cuenta ONG creada correctamente.'
+      : 'Cuenta creada correctamente.'
+  );
+
+  setTimeout(() => navigate('/login'), 1200);
+}
+//
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -72,6 +85,65 @@ export default function RegisterScreen() {
           onChange={e => setNombre(e.target.value)}
           style={{ display: 'block', width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #c6eadb', fontFamily: 'inherit' }}
         />
+        <div
+  style={{
+    display: 'flex',
+    gap: '10px',
+    marginBottom: '12px',
+  }}
+>
+
+<button
+  type="button"
+  onClick={() => setAccountType('user')}
+  style={{
+    flex: 1,
+    padding: '12px',
+    borderRadius: '8px',
+    border:
+      accountType === 'user'
+        ? '2px solid #1a6b4a'
+        : '1px solid #c6eadb',
+
+    background:
+      accountType === 'user'
+        ? '#eaf5f0'
+        : '#fff',
+
+    fontWeight: 'bold',
+    color: '#000', // ← NUEVO
+    cursor: 'pointer',
+  }}
+>
+  👤 Usuario
+</button>
+
+<button
+  type="button"
+  onClick={() => setAccountType('ong')}
+  style={{
+    flex: 1,
+    padding: '12px',
+    borderRadius: '8px',
+    border:
+      accountType === 'ong'
+        ? '2px solid #1a6b4a'
+        : '1px solid #c6eadb',
+
+    background:
+      accountType === 'ong'
+        ? '#eaf5f0'
+        : '#fff',
+
+    fontWeight: 'bold',
+    color: '#000', // ← NUEVO
+    cursor: 'pointer',
+  }}
+>
+  🏢 Cuenta ONG
+</button>
+
+</div>
         <input
           type="email"
           placeholder="Correo electrónico"
