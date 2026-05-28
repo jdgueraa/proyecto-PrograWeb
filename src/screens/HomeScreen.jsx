@@ -1,23 +1,23 @@
 // src/screens/HomeScreen.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ongs, campañas } from '../data';
+import { ongs, campañas } from '../data.json';
 
 import CampaignCard from '../components/CampaignCard';
 import FeaturedOng from '../components/FeaturedOng';
+import CampaignDetailModal from '../components/CampaignDetailModal';
 import '../App.css';
 
 export default function HomeScreen() {
   const navigate = useNavigate();
+  const [selectedCampaña, setSelectedCampaña] = useState(null);
 
-  // Buscar la ONG destacada de la semana
-  const ongDestacada = ongs.find(o => o.featured === true) || ongs[0];
-
-  const campañasUrgentes = campañas.filter(c => c.urgent === true);
+  const ongDestacada      = ongs.find(o => o.featured === true) || ongs[0];
+  const campañasUrgentes  = campañas.filter(c => c.urgent === true);
 
   return (
     <div className="fade-in home-screen-wrapper">
-      
+
       {/* 1. SECTION PRINCIPAL */}
       <div className="home-principal">
         <h1 className="home-screen-principal-title">Transforma realidades en el Perú</h1>
@@ -57,23 +57,29 @@ export default function HomeScreen() {
         </div>
 
         <div className="home-screen-campaigns-grid">
-          {/* Mapeamos el nuevo arreglo filtrado */}
-          {campañasUrgentes.map((campaña) => (
-            <CampaignCard 
-              key={campaña.id} 
-              campaña={campaña} 
-              onAction={() => navigate('/buscar')} 
+          {campañasUrgentes.map(campaña => (
+            <CampaignCard
+              key={campaña.id}
+              campaña={campaña}
+              onCardClick={() => setSelectedCampaña(campaña)}
+              onAction={() => navigate('/donaciones')}
             />
           ))}
         </div>
       </div>
 
       {/* 4. SECCIÓN: ONG DESTACADA DE LA SEMANA */}
-      <FeaturedOng 
-        ong={ongDestacada} 
-        onNavigate={() => navigate(`/perfil/${ongDestacada?.id || 1}`)} 
+      <FeaturedOng
+        ong={ongDestacada}
+        onNavigate={() => navigate(`/perfil/${ongDestacada?.id || 1}`)}
       />
 
+      {selectedCampaña && (
+        <CampaignDetailModal
+          campaña={selectedCampaña}
+          onClose={() => setSelectedCampaña(null)}
+        />
+      )}
     </div>
   );
 }

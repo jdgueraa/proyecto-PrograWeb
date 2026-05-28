@@ -24,6 +24,9 @@ import MyProfileScreen from './screens/MyProfileScreen.jsx'; // Tu pantalla de p
 // SCREEN ONG  (Santiago)
 import AdminScreen from './screens/AdminScreen';
 
+import DonationsScreen from './screens/DonationsScreen';
+import VoluntariadoScreen from './screens/VoluntariadoScreen';
+
 // Layout con sidebar para las pantallas internas
 function AppLayout({ children, user }) {
   return (
@@ -82,6 +85,8 @@ function handleLogin(email, password) {
         <Route path="/buscar"     element={<AppLayout><SearchScreen /></AppLayout>} />
         <Route path="/perfil/:id" element={<AppLayout><ProfileScreen /></AppLayout>} />
         <Route path="/MiPerfil" element={ authUser ? (<AppLayout><MyProfileScreen user={authUser} /></AppLayout>) : (<Navigate to="/login" replace />)}/>
+        <Route path="/donaciones"   element={<AppLayout user={authUser}><DonationsScreen /></AppLayout>} />
+        <Route path="/voluntariado" element={<AppLayout user={authUser}><VoluntariadoScreen /></AppLayout>} />
         <Route path="/admin" element= {authUser?.role === 'ong' ? (<AppLayout user={authUser}><AdminScreen /></AppLayout>) : (<Navigate to="/home" replace />)}/>
       </Routes>
     </BrowserRouter>

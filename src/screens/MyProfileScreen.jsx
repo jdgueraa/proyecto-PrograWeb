@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { ongs, campañas } from '../data'; // Asegúrate de que la ruta a tu data.jsx sea correcta
+import { ongs, campañas } from '../data.json';
 
 export default function MyProfileScreen({ user }) {
     const navigate = useNavigate();

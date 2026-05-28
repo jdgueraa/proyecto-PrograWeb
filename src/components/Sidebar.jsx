@@ -8,8 +8,8 @@ export default function Sidebar({ user }) {
 const items = [
   { icon: "🏠", label: "Inicio", path: "/home" },
   { icon: "🔍", label: "Buscar", path: "/buscar" },
-  { icon: "❤️", label: "Donaciones", path: null },
-  { icon: "🤝", label: "Voluntariado", path: null },
+  { icon: "❤️", label: "Donaciones", path: "/donaciones" },
+  { icon: "🤝", label: "Voluntariado", path: "/voluntariado" },
 
   ...(user?.role === 'ong'
     ? [
