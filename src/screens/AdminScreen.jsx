@@ -1,3 +1,4 @@
+//SCREEN ONG (SANTIAGO)
 import React, { useState } from 'react';
 
 export default function AdminScreen() {
