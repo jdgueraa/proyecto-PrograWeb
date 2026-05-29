@@ -10,9 +10,9 @@ export default function SearchScreen() {
   // Lógica de filtrado por buscador y por botones de categorías
   const filtered = ongs.filter(o => {
     const matchQ = o.name.toLowerCase().includes(query.toLowerCase()) ||
-                   o.desc.toLowerCase().includes(query.toLowerCase()) ||
-                   o.tags.some(t => t.toLowerCase().includes(query.toLowerCase()));
-                   
+                  o.desc.toLowerCase().includes(query.toLowerCase()) ||
+                  o.tags.some(t => t.toLowerCase().includes(query.toLowerCase()));
+                  
     const matchF = activeFilter === "Todas" || o.tags.some(t => t.toLowerCase() === activeFilter.toLowerCase());
     
     return matchQ && matchF;
