@@ -418,5 +418,41 @@
       "badge": "Activo",
       "badgeClass": "badge-active"
     }
+  ],
+  "usuarios": [
+    {
+      "id": 1,
+      "email": "persona@demo.com",
+      "password": "demo123",
+      "fullName": "María García López",
+      "username": "maria_garcia",
+      "role": "persona",
+      "creditos": 500,
+      "donaciones": [],
+      "voluntariadosPostulados": []
+    },
+    {
+      "id": 2,
+      "email": "ong@demo.com",
+      "password": "demo123",
+      "fullName": "Admin Tierra Verde",
+      "username": "admin_tierra_verde",
+      "role": "ong",
+      "ongId": 1,
+      "creditos": 0,
+      "donaciones": [],
+      "voluntariadosPostulados": []
+    },
+    {
+      "id": 3,
+      "email": "amante.de.gatitos55@example.com",
+      "password": "gatitos55",
+      "fullName": "Amante de Gatitos 55",
+      "username": "amante_gatitos55",
+      "role": "persona",
+      "creditos": 350,
+      "donaciones": [],
+      "voluntariadosPostulados": []
+    }
   ]
 }

@@ -41,6 +41,9 @@ function handleRegister() {
     email: emailValue,
     password,
     role: accountType,
+    creditos: 200,
+    donaciones: [],
+    voluntariadosPostulados: [],
   };
 
   localStorage.setItem('registeredUser', JSON.stringify(userData));

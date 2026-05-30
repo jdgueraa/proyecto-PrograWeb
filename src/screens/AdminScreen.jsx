@@ -1,117 +1,332 @@
-//SCREEN ONG (SANTIAGO)
 import React, { useState } from 'react';
+import dataJson from '../data.json';
 
-export default function AdminScreen() {
+const CATEGORIAS = ['Medio Ambiente', 'Educación', 'Salud', 'Agua', 'Pobreza'];
+const MODALIDADES = ['Presencial', 'Virtual', 'Híbrido'];
 
-const [campaigns, setCampaigns] = useState([]);
+const TABS = [
+  { id: 'campañas',      label: '📋 Mis Campañas' },
+  { id: 'voluntariados', label: '🤝 Mis Voluntariados' },
+  { id: 'crear-campaña', label: '➕ Crear Campaña' },
+  { id: 'crear-vol',     label: '➕ Crear Voluntariado' },
+];
 
-const [form, setForm] = useState({
-    title: '',
-    desc: '',
-    type: 'campaña',
-});
+export default function AdminScreen({ user, campañas = [], voluntariados = [], onCreateCampaña, onCreateVoluntariado }) {
+  const [activeTab, setActiveTab] = useState('campañas');
 
-function handleChange(e) {
-    setForm({
-    ...form,
-    [e.target.name]: e.target.value,
+  const [formCampaña, setFormCampaña] = useState({
+    name: '', desc: '', meta: '', category: 'Educación',
+    location: '', fechaInicio: '', fechaFin: '', urgent: false,
+  });
+
+  const [formVol, setFormVol] = useState({
+    name: '', desc: '', category: 'Educación', modalidad: 'Presencial',
+    cupos: '', duracion: '', fechaInicio: '', location: '',
+  });
+
+  const [mensajeCampaña, setMensajeCampaña] = useState('');
+  const [mensajeVol, setMensajeVol] = useState('');
+
+  const miOng = dataJson.ongs.find(o => o.id === user?.ongId);
+  const misCampañas = campañas.filter(c => c.ongId === user?.ongId);
+  const misVoluntariados = voluntariados.filter(v => v.ongId === user?.ongId);
+
+  const donacionesLog = JSON.parse(localStorage.getItem('donacionesLog') || '[]');
+  const postulacionesLog = JSON.parse(localStorage.getItem('postulaciones') || '[]');
+
+  function handleCrearCampaña() {
+    if (!formCampaña.name || !formCampaña.desc || !formCampaña.meta || !formCampaña.location) {
+      setMensajeCampaña('Completa todos los campos obligatorios.');
+      return;
+    }
+    onCreateCampaña({
+      id: Date.now(),
+      name: formCampaña.name.trim(),
+      desc: formCampaña.desc.trim(),
+      impacto: formCampaña.desc.trim(),
+      meta: parseInt(formCampaña.meta),
+      actual: 0,
+      donantes: 0,
+      badge: 'Activa',
+      badgeClass: 'badge-active',
+      urgent: formCampaña.urgent,
+      category: formCampaña.category,
+      ongId: user.ongId,
+      ongName: miOng?.name || 'Mi ONG',
+      location: formCampaña.location.trim(),
+      fechaInicio: formCampaña.fechaInicio || new Date().toISOString().split('T')[0],
+      fechaFin: formCampaña.fechaFin || '',
+      actualizacion: '',
+      beneficiarios: 0,
     });
-}
+    setFormCampaña({ name: '', desc: '', meta: '', category: 'Educación', location: '', fechaInicio: '', fechaFin: '', urgent: false });
+    setMensajeCampaña('¡Campaña creada! Ya aparece en la sección de Donaciones.');
+    setTimeout(() => setMensajeCampaña(''), 4000);
+  }
 
-function handleCreate() {
-
-    if (!form.title || !form.desc) return;
-
-    const newPost = {
-    id: Date.now(),
-    ...form,
-    };
-
-    setCampaigns([...campaigns, newPost]);
-
-    setForm({
-    title: '',
-    desc: '',
-    type: 'campaña',
+  function handleCrearVoluntariado() {
+    if (!formVol.name || !formVol.desc || !formVol.cupos || !formVol.location) {
+      setMensajeVol('Completa todos los campos obligatorios.');
+      return;
+    }
+    onCreateVoluntariado({
+      id: Date.now(),
+      name: formVol.name.trim(),
+      desc: formVol.desc.trim(),
+      impacto: formVol.desc.trim(),
+      actividades: [],
+      requisitos: [],
+      ongId: user.ongId,
+      ongName: miOng?.name || 'Mi ONG',
+      location: formVol.location.trim(),
+      category: formVol.category,
+      modalidad: formVol.modalidad,
+      cupos: parseInt(formVol.cupos),
+      cuposOcupados: 0,
+      duracion: formVol.duracion || 'Por definir',
+      fechaInicio: formVol.fechaInicio || new Date().toISOString().split('T')[0],
+      badge: 'Activo',
+      badgeClass: 'badge-active',
+      actualizacion: '',
     });
-}
+    setFormVol({ name: '', desc: '', category: 'Educación', modalidad: 'Presencial', cupos: '', duracion: '', fechaInicio: '', location: '' });
+    setMensajeVol('¡Voluntariado creado! Ya aparece en la sección de Voluntariado.');
+    setTimeout(() => setMensajeVol(''), 4000);
+  }
 
-function handleDelete(id) {
-    setCampaigns(
-    campaigns.filter(c => c.id !== id)
-    );
-}
-
-return (
+  return (
     <div className="admin-wrapper fade-in">
+      <h1 className="admin-title">Panel ONG</h1>
 
-    <h1 className="admin-title">
-        Panel ONG
-    </h1>
-
-    <div className="admin-form">
-
-        <input
-        type="text"
-        placeholder="Título"
-        name="title"
-        value={form.title}
-        onChange={handleChange}
-        />
-
-        <textarea
-        placeholder="Descripción"
-        name="desc"
-        value={form.desc}
-        onChange={handleChange}
-        />
-
-        <select
-        name="type"
-        value={form.type}
-        onChange={handleChange}
-        >
-        <option value="campaña">
-            Campaña
-        </option>
-
-        <option value="voluntariado">
-            Voluntariado
-        </option>
-        </select>
-
-        <button onClick={handleCreate}>
-        Crear publicación
-        </button>
-
-    </div>
-
-    <div className="admin-posts">
-
-        {campaigns.map(post => (
-
-        <div key={post.id} className="admin-card">
-
-            <span className="admin-badge">
-            {post.type}
-            </span>
-
-            <h3>{post.title}</h3>
-
-            <p>{post.desc}</p>
-
-            <button
-            onClick={() => handleDelete(post.id)}
-            >
-            Eliminar
-            </button>
-
+      {miOng && (
+        <div className="admin-ong-header">
+          <span className="admin-ong-header-emoji">{miOng.emoji}</span>
+          <div>
+            <p className="admin-ong-header-name">{miOng.name}</p>
+            <p className="admin-ong-header-location">{miOng.location}</p>
+          </div>
         </div>
+      )}
 
+      <div className="admin-tabs">
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            className={`admin-tab-btn ${activeTab === tab.id ? 'admin-tab-btn--active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            {tab.label}
+          </button>
         ))}
+      </div>
 
-    </div>
+      {/* ── Mis Campañas ── */}
+      {activeTab === 'campañas' && (
+        <div>
+          {misCampañas.length === 0 ? (
+            <div className="admin-empty-state">
+              <div className="admin-empty-icon">📋</div>
+              <p>Aún no tienes campañas creadas.</p>
+              <button className="admin-empty-btn" onClick={() => setActiveTab('crear-campaña')}>
+                Crear primera campaña
+              </button>
+            </div>
+          ) : (
+            <div className="admin-item-list">
+              {misCampañas.map(c => {
+                const donantes = donacionesLog.filter(d => d.campañaId === c.id);
+                const pct = Math.min(100, Math.round((c.actual / c.meta) * 100));
+                return (
+                  <div key={c.id} className="admin-item-card">
+                    <div className="admin-item-header">
+                      <h3 className="admin-item-title">{c.name}</h3>
+                      <span className={`campaign-badge ${c.badgeClass}`}>{c.badge}</span>
+                    </div>
+                    <p className="admin-item-desc">{c.desc}</p>
+                    <div className="admin-progress-row">
+                      <span>S/. {c.actual.toLocaleString()} / {c.meta.toLocaleString()}</span>
+                      <strong>{pct}%</strong>
+                    </div>
+                    <div className="admin-progress-bar-bg">
+                      <div className="admin-progress-bar-fill" style={{ width: `${pct}%` }} />
+                    </div>
+                    <p className="admin-section-label">❤️ Donantes ({donantes.length})</p>
+                    {donantes.length === 0 ? (
+                      <p className="admin-empty-msg">Aún no hay donaciones para esta campaña.</p>
+                    ) : (
+                      <div className="admin-log-list">
+                        {donantes.map((d, i) => (
+                          <div key={i} className="admin-log-row">
+                            <span className="admin-log-name">👤 {d.userName}</span>
+                            <span className="admin-log-amount">S/. {d.amount}</span>
+                            <span className="admin-log-date">{new Date(d.fecha).toLocaleDateString('es-PE')}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
+      {/* ── Mis Voluntariados ── */}
+      {activeTab === 'voluntariados' && (
+        <div>
+          {misVoluntariados.length === 0 ? (
+            <div className="admin-empty-state">
+              <div className="admin-empty-icon">🤝</div>
+              <p>Aún no tienes voluntariados creados.</p>
+              <button className="admin-empty-btn" onClick={() => setActiveTab('crear-vol')}>
+                Crear primer voluntariado
+              </button>
+            </div>
+          ) : (
+            <div className="admin-item-list">
+              {misVoluntariados.map(v => {
+                const postulantes = postulacionesLog.filter(p => p.voluntariadoId === v.id);
+                const cuposLibres = v.cupos - v.cuposOcupados;
+                return (
+                  <div key={v.id} className="admin-item-card">
+                    <div className="admin-item-header">
+                      <h3 className="admin-item-title">{v.name}</h3>
+                      <span className={`campaign-badge ${v.badgeClass}`}>{v.badge}</span>
+                    </div>
+                    <p className="admin-item-desc">{v.desc}</p>
+                    <p className="admin-vol-meta">
+                      📍 {v.location} · 🪑 {cuposLibres} cupo{cuposLibres !== 1 ? 's' : ''} libre{cuposLibres !== 1 ? 's' : ''}
+                    </p>
+                    <p className="admin-section-label">🤝 Postulantes ({postulantes.length})</p>
+                    {postulantes.length === 0 ? (
+                      <p className="admin-empty-msg">Aún no hay postulantes para este voluntariado.</p>
+                    ) : (
+                      <div className="admin-log-list">
+                        {postulantes.map((p, i) => (
+                          <div key={i} className="admin-log-row">
+                            <span className="admin-log-name">👤 {p.userName}</span>
+                            <span className="admin-log-email">{p.userEmail}</span>
+                            <span className="admin-log-date">{new Date(p.fecha).toLocaleDateString('es-PE')}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Crear Campaña ── */}
+      {activeTab === 'crear-campaña' && (
+        <div className="admin-form-section">
+          <h2 className="admin-form-title">Nueva campaña de donación</h2>
+          {mensajeCampaña && (
+            <div className={`admin-msg ${mensajeCampaña.includes('¡') ? 'admin-msg--success' : 'admin-msg--error'}`}>
+              {mensajeCampaña}
+            </div>
+          )}
+          <div className="admin-field-group">
+            <div>
+              <label className="admin-label">Título de la campaña *</label>
+              <input className="admin-input" placeholder="Ej: Reforestación en Loreto" value={formCampaña.name} onChange={e => setFormCampaña({ ...formCampaña, name: e.target.value })} />
+            </div>
+            <div>
+              <label className="admin-label">Descripción / Impacto *</label>
+              <textarea className="admin-input admin-input--textarea" placeholder="¿Qué hace esta campaña y cuál es su impacto?" value={formCampaña.desc} onChange={e => setFormCampaña({ ...formCampaña, desc: e.target.value })} />
+            </div>
+            <div className="admin-field-row">
+              <div>
+                <label className="admin-label">Meta (S/.) *</label>
+                <input className="admin-input" type="number" min="1" placeholder="Ej: 15000" value={formCampaña.meta} onChange={e => setFormCampaña({ ...formCampaña, meta: e.target.value })} />
+              </div>
+              <div>
+                <label className="admin-label">Categoría</label>
+                <select className="admin-input" value={formCampaña.category} onChange={e => setFormCampaña({ ...formCampaña, category: e.target.value })}>
+                  {CATEGORIAS.map(c => <option key={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="admin-label">Ubicación *</label>
+              <input className="admin-input" placeholder="Ej: Loreto, Perú" value={formCampaña.location} onChange={e => setFormCampaña({ ...formCampaña, location: e.target.value })} />
+            </div>
+            <div className="admin-field-row">
+              <div>
+                <label className="admin-label">Fecha de inicio</label>
+                <input className="admin-input" type="date" value={formCampaña.fechaInicio} onChange={e => setFormCampaña({ ...formCampaña, fechaInicio: e.target.value })} />
+              </div>
+              <div>
+                <label className="admin-label">Fecha de cierre</label>
+                <input className="admin-input" type="date" value={formCampaña.fechaFin} onChange={e => setFormCampaña({ ...formCampaña, fechaFin: e.target.value })} />
+              </div>
+            </div>
+            <label className="admin-checkbox-label">
+              <input type="checkbox" checked={formCampaña.urgent} onChange={e => setFormCampaña({ ...formCampaña, urgent: e.target.checked })} />
+              Marcar como urgente 🔥
+            </label>
+            <button className="admin-submit-btn" onClick={handleCrearCampaña}>Crear campaña</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Crear Voluntariado ── */}
+      {activeTab === 'crear-vol' && (
+        <div className="admin-form-section">
+          <h2 className="admin-form-title">Nuevo voluntariado</h2>
+          {mensajeVol && (
+            <div className={`admin-msg ${mensajeVol.includes('¡') ? 'admin-msg--success' : 'admin-msg--error'}`}>
+              {mensajeVol}
+            </div>
+          )}
+          <div className="admin-field-group">
+            <div>
+              <label className="admin-label">Nombre del voluntariado *</label>
+              <input className="admin-input" placeholder="Ej: Brigada de reforestación" value={formVol.name} onChange={e => setFormVol({ ...formVol, name: e.target.value })} />
+            </div>
+            <div>
+              <label className="admin-label">Descripción *</label>
+              <textarea className="admin-input admin-input--textarea" placeholder="¿Qué harán los voluntarios y cuál es el impacto?" value={formVol.desc} onChange={e => setFormVol({ ...formVol, desc: e.target.value })} />
+            </div>
+            <div className="admin-field-row">
+              <div>
+                <label className="admin-label">Categoría</label>
+                <select className="admin-input" value={formVol.category} onChange={e => setFormVol({ ...formVol, category: e.target.value })}>
+                  {CATEGORIAS.map(c => <option key={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="admin-label">Modalidad</label>
+                <select className="admin-input" value={formVol.modalidad} onChange={e => setFormVol({ ...formVol, modalidad: e.target.value })}>
+                  {MODALIDADES.map(m => <option key={m}>{m}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="admin-field-row">
+              <div>
+                <label className="admin-label">Cupos disponibles *</label>
+                <input className="admin-input" type="number" min="1" placeholder="Ej: 20" value={formVol.cupos} onChange={e => setFormVol({ ...formVol, cupos: e.target.value })} />
+              </div>
+              <div>
+                <label className="admin-label">Duración</label>
+                <input className="admin-input" placeholder="Ej: 2 semanas" value={formVol.duracion} onChange={e => setFormVol({ ...formVol, duracion: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <label className="admin-label">Ubicación *</label>
+              <input className="admin-input" placeholder="Ej: Loreto, Perú / Remoto" value={formVol.location} onChange={e => setFormVol({ ...formVol, location: e.target.value })} />
+            </div>
+            <div>
+              <label className="admin-label">Fecha de inicio</label>
+              <input className="admin-input" type="date" value={formVol.fechaInicio} onChange={e => setFormVol({ ...formVol, fechaInicio: e.target.value })} />
+            </div>
+            <button className="admin-submit-btn" onClick={handleCrearVoluntariado}>Crear voluntariado</button>
+          </div>
+        </div>
+      )}
     </div>
-);
+  );
 }

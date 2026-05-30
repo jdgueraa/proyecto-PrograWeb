@@ -1,43 +1,51 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-export default function Sidebar({ user }) {
+const ITEMS_PERSONA = [
+  { icon: "🏠", label: "Inicio",       path: "/home" },
+  { icon: "🔍", label: "Buscar",       path: "/buscar" },
+  { icon: "❤️", label: "Donaciones",   path: "/donaciones" },
+  { icon: "🤝", label: "Voluntariado", path: "/voluntariado" },
+  { icon: "👤", label: "Mi perfil",    path: "/MiPerfil" },
+];
+
+const ITEMS_ONG = [
+  { icon: "🛠️", label: "Panel ONG", path: "/admin" },
+  { icon: "👤", label: "Mi perfil",  path: "/MiPerfil" },
+];
+
+export default function Sidebar({ user, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-const items = [
-  { icon: "🏠", label: "Inicio", path: "/home" },
-  { icon: "🔍", label: "Buscar", path: "/buscar" },
-  { icon: "❤️", label: "Donaciones", path: "/donaciones" },
-  { icon: "🤝", label: "Voluntariado", path: "/voluntariado" },
-
-  ...(user?.role === 'ong'
-    ? [
-        {
-          icon: "🛠️",
-          label: "Panel ONG",
-          path: "/admin",
-        },
-      ]
-    : []),
-
-  { icon: "👤", label: "Mi perfil", path: "/MiPerfil" },
-];
+  const items = user?.role === 'ong' ? ITEMS_ONG : ITEMS_PERSONA;
 
   return (
     <nav className="sidebar">
       <div className="sidebar-logo">🌿</div>
+
       {items.map((item, idx) => (
         <div
           key={idx}
-          className={`sidebar-item ${location.pathname === item.path ? "active" : ""}`}
+          className={`sidebar-item ${location.pathname === item.path ? 'active' : ''}`}
           title={item.label}
-          onClick={() => item.path && navigate(item.path)}
-          style={{ cursor: item.path ? "pointer" : "default" }}
+          onClick={() => navigate(item.path)}
+          style={{ cursor: 'pointer' }}
         >
           {item.icon}
         </div>
       ))}
+
+      {onLogout && (
+        <div
+          className="sidebar-item"
+          title="Cerrar sesión"
+          onClick={() => { onLogout(); navigate('/login'); }}
+          style={{ cursor: 'pointer', marginTop: 'auto' }}
+        >
+          🚪
+        </div>
+      )}
     </nav>
   );
 }

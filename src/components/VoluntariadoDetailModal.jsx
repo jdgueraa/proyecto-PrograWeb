@@ -1,10 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const MODALIDAD_ICON = { Presencial: '📍', Virtual: '💻', Híbrido: '🔄' };
 
-export default function VoluntariadoDetailModal({ voluntariado: v, onClose }) {
+export default function VoluntariadoDetailModal({ voluntariado: v, user, onPostular, onClose }) {
   const navigate = useNavigate();
+
+  const [confirmando, setConfirmando] = useState(false);
+  const [postulacionStatus, setPostulacionStatus] = useState(null);
 
   useEffect(() => {
     const handleKey = e => { if (e.key === 'Escape') onClose(); };
@@ -14,33 +17,88 @@ export default function VoluntariadoDetailModal({ voluntariado: v, onClose }) {
 
   if (!v) return null;
 
-  const cuposLibres  = v.cupos - v.cuposOcupados;
-  const pctOcupado   = Math.round((v.cuposOcupados / v.cupos) * 100);
-  const lleno        = v.badge === 'Lleno' || cuposLibres <= 0;
-  const fechaInicio  = new Date(v.fechaInicio).toLocaleDateString('es-PE', {
+  const cuposLibres = v.cupos - v.cuposOcupados;
+  const pctOcupado  = Math.round((v.cuposOcupados / v.cupos) * 100);
+  const lleno       = v.badge === 'Lleno' || cuposLibres <= 0;
+  const yaPostulado = user?.voluntariadosPostulados?.some(p => p.voluntariadoId === v.id) || false;
+
+  const fechaInicio = new Date(v.fechaInicio).toLocaleDateString('es-PE', {
     day: 'numeric', month: 'long', year: 'numeric',
   });
+
+  function handlePostularConfirm() {
+    if (!user) { setPostulacionStatus('noauth'); return; }
+    onPostular(v.id);
+    setPostulacionStatus('success');
+    setConfirmando(false);
+  }
+
+  function renderAccion() {
+    if (lleno) {
+      return (
+        <button className="donations-btn donations-btn--done" disabled>
+          ✓ Sin cupos disponibles
+        </button>
+      );
+    }
+    if (postulacionStatus === 'success' || yaPostulado) {
+      return (
+        <div className="postular-success">
+          <div className="postular-success-icon">🎉</div>
+          <p className="postular-success-title">¡Postulación enviada!</p>
+          <p className="postular-success-subtitle">La ONG se pondrá en contacto contigo pronto.</p>
+        </div>
+      );
+    }
+    if (postulacionStatus === 'noauth') {
+      return (
+        <div className="postular-noauth-alert">
+          Debes <button onClick={() => { onClose(); navigate('/login'); }}>iniciar sesión</button> para postularte.
+        </div>
+      );
+    }
+    if (confirmando) {
+      return (
+        <div className="postular-confirm-panel">
+          <p className="postular-confirm-text">¿Confirmar tu postulación a este voluntariado?</p>
+          <div className="postular-confirm-actions">
+            <button className="postular-confirm-btn-yes" onClick={handlePostularConfirm}>
+              Sí, postularme
+            </button>
+            <button className="postular-confirm-btn-cancel" onClick={() => setConfirmando(false)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <button
+        className="donations-btn vol-btn-postular"
+        onClick={() => {
+          if (!user) { setPostulacionStatus('noauth'); return; }
+          setConfirmando(true);
+        }}
+      >
+        🤝 Postularme a este voluntariado
+      </button>
+    );
+  }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-box" onClick={e => e.stopPropagation()}>
 
-        {/* ── Cerrar ── */}
         <button className="modal-close-btn" onClick={onClose} aria-label="Cerrar">✕</button>
 
-        {/* ── Badges ── */}
         <div className="modal-badges">
           <span className={`campaign-badge ${v.badgeClass}`}>{v.badge}</span>
-          <span className="vol-modalidad-tag">
-            {MODALIDAD_ICON[v.modalidad]} {v.modalidad}
-          </span>
+          <span className="vol-modalidad-tag">{MODALIDAD_ICON[v.modalidad]} {v.modalidad}</span>
           {v.category && <span className="modal-category-tag">{v.category}</span>}
         </div>
 
-        {/* ── Título ── */}
         <h2 className="modal-title">{v.name}</h2>
 
-        {/* ── ONG y ubicación ── */}
         <button
           className="donations-card-ong-link modal-ong-link"
           onClick={() => { navigate(`/perfil/${v.ongId}`); onClose(); }}
@@ -48,7 +106,6 @@ export default function VoluntariadoDetailModal({ voluntariado: v, onClose }) {
           {v.ongName} · 📍 {v.location}
         </button>
 
-        {/* ── Stats rápidas ── */}
         <div className="modal-stats-row">
           <div className="modal-stat-chip">
             <span className="modal-stat-icon">🪑</span>
@@ -69,7 +126,7 @@ export default function VoluntariadoDetailModal({ voluntariado: v, onClose }) {
           <div className="modal-stat-chip">
             <span className="modal-stat-icon">📅</span>
             <div>
-              <span className="modal-stat-value" style={{ fontSize: '12px' }}>{fechaInicio}</span>
+              <span className="modal-stat-value modal-stat-value--small">{fechaInicio}</span>
               <span className="modal-stat-label">Fecha de inicio</span>
             </div>
           </div>
@@ -77,15 +134,13 @@ export default function VoluntariadoDetailModal({ voluntariado: v, onClose }) {
 
         <div className="modal-divider" />
 
-        {/* ── Descripción de impacto ── */}
         <div className="modal-section">
           <h4 className="modal-section-title">Sobre este voluntariado</h4>
           <p className="modal-desc">{v.impacto || v.desc}</p>
         </div>
 
-        {/* ── Actividades ── */}
         {v.actividades?.length > 0 && (
-          <div className="modal-section" style={{ marginTop: '16px' }}>
+          <div className="modal-section">
             <h4 className="modal-section-title">¿Qué harás?</h4>
             <ul className="modal-list">
               {v.actividades.map((act, i) => (
@@ -97,9 +152,8 @@ export default function VoluntariadoDetailModal({ voluntariado: v, onClose }) {
           </div>
         )}
 
-        {/* ── Requisitos ── */}
         {v.requisitos?.length > 0 && (
-          <div className="modal-section" style={{ marginTop: '16px' }}>
+          <div className="modal-section">
             <h4 className="modal-section-title">Requisitos</h4>
             <ul className="modal-list">
               {v.requisitos.map((req, i) => (
@@ -111,9 +165,8 @@ export default function VoluntariadoDetailModal({ voluntariado: v, onClose }) {
           </div>
         )}
 
-        {/* ── Última actualización ── */}
         {v.actualizacion && (
-          <div className="modal-update-box" style={{ marginTop: '16px' }}>
+          <div className="modal-update-box">
             <span className="modal-update-label">📣 Última actualización</span>
             <p className="modal-update-text">{v.actualizacion}</p>
           </div>
@@ -121,7 +174,6 @@ export default function VoluntariadoDetailModal({ voluntariado: v, onClose }) {
 
         <div className="modal-divider" />
 
-        {/* ── Cupos ── */}
         <div className="modal-section">
           <h4 className="modal-section-title">Disponibilidad</h4>
           <div className="modal-progress-numbers">
@@ -131,24 +183,15 @@ export default function VoluntariadoDetailModal({ voluntariado: v, onClose }) {
             </span>
             <span className="modal-pct-big">{pctOcupado}%</span>
           </div>
-          <div className="donations-progress-bar-bg" style={{ height: '10px', margin: '10px 0' }}>
+          <div className="donations-progress-bar-bg modal-progress-bar">
             <div
               className="donations-progress-bar-fill"
-              style={{
-                width: `${pctOcupado}%`,
-                backgroundColor: lleno ? 'var(--green-light)' : 'var(--teal)',
-              }}
+              style={{ width: `${pctOcupado}%`, backgroundColor: lleno ? 'var(--green-light)' : 'var(--teal)' }}
             />
           </div>
         </div>
 
-        {/* ── Acción ── */}
-        <button
-          className={`donations-btn ${lleno ? 'donations-btn--done' : 'vol-btn-postular'}`}
-          disabled={lleno}
-        >
-          {lleno ? '✓ Sin cupos disponibles' : '🤝 Postularme a este voluntariado'}
-        </button>
+        {renderAccion()}
 
       </div>
     </div>
