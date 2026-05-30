@@ -1,10 +1,45 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { ongs, campañas } from '../data.json';
+import ProfilePhotoModal from '../components/ProfilePhotoModal.jsx';
 
 export default function MyProfileScreen({ user }) {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('actividad');
+
+        // Estado para la foto y el modal (deben declararse antes de cualquier return)
+        const defaultFotoUrl = user?.email?.toLowerCase() === 'amante.de.gatitos55@example.com'
+                ? "https://img.buzzfeed.com/buzzfeed-static/static/2025-03/13/18/subbuzz/UjLcjUoUE0.jpg?downsize=700%3A%2A&output-quality=auto&output-format=auto"
+                : '';
+
+        // Cargar foto guardada en localStorage si existe para este usuario
+        let initialFoto = defaultFotoUrl;
+        try {
+            const stored = JSON.parse(localStorage.getItem('registeredUser'));
+            if (stored && stored.email && user?.email && stored.email.toLowerCase() === user.email.toLowerCase() && stored.photoUrl) {
+                initialFoto = stored.photoUrl;
+            }
+        } catch (e) {
+            // ignore
+        }
+
+        const [fotoUrl, setFotoUrl] = useState(initialFoto);
+        const [showPhotoModal, setShowPhotoModal] = useState(false);
+        const [photoInput, setPhotoInput] = useState('');
+
+        // Guarda la URL en estado y en localStorage para persistirla
+        function saveProfilePhoto(url) {
+            setFotoUrl(url);
+            try {
+                const stored = JSON.parse(localStorage.getItem('registeredUser')) || null;
+                if (stored && stored.email && user?.email && stored.email.toLowerCase() === user.email.toLowerCase()) {
+                    stored.photoUrl = url;
+                    localStorage.setItem('registeredUser', JSON.stringify(stored));
+                }
+            } catch (e) {
+                // si falla, no bloqueamos la experiencia
+            }
+        }
 
     if (!user) {
         return <Navigate to="/login" replace />;
@@ -16,13 +51,14 @@ export default function MyProfileScreen({ user }) {
         fullName: user.fullName || user.username || (user.email || '').split('@')[0],
         username: user.username || (user.email || '').split('@')[0],
         biografia: isDefaultProfile ? "Lo que disfruto es poder ayudar a la gente" : '',
-        fotoUrl: isDefaultProfile
-            ? "https://img.buzzfeed.com/buzzfeed-static/static/2025-03/13/18/subbuzz/UjLcjUoUE0.jpg?downsize=700%3A%2A&output-quality=auto&output-format=auto"
-            : '',
+        // fotoUrl se gestiona vía estado `fotoUrl`
+        fotoUrl: isDefaultProfile ? defaultFotoUrl : '',
         bannerUrl: "https://www.revista-ballesol.com/wp-content/uploads/2024/02/ONG-840x559.jpg", // Imagen de fondo para el banner
         // Simulamos que el usuario sigue a las ONGs con ID 1 y 3 de tu data.jsx
         ongsSeguidasIds: [1, 3],
     };
+
+    
 
     // Filtramos las ONGs reales que coinciden con las que el usuario ayuda
     const misOngsAyudadas = ongs.filter(ong => usuarioLogueado.ongsSeguidasIds.includes(ong.id));
@@ -32,20 +68,24 @@ export default function MyProfileScreen({ user }) {
 
     return (
         <div className="profile-dashboard">
-            <h1>Mi perfil</h1>
+            <h1 className="profile-page-title">Mi perfil</h1>
             {/* BANNER Y DETALLES DE USUARIO */}
             <div className="profile-hero">
                 <div className="profile-banner" style={{ backgroundImage: `url(${usuarioLogueado.bannerUrl})` }}></div>
                 <div className="profile-info-strip">
                     <div className="profile-avatar-container">
-                        {usuarioLogueado.fotoUrl ? (
-                          <img src={usuarioLogueado.fotoUrl} alt="Avatar" className="profile-avatar" />
-                        ) : (
-                          <div className="profile-avatar profile-avatar-empty" aria-label="Avatar vacío"></div>
-                        )}
-                        <button className="profile-btn-edit-photo" title="Cambiar foto de perfil">
-                            +
-                        </button>
+                                                {fotoUrl ? (
+                                                    <img src={fotoUrl} alt="Avatar" className="profile-avatar" />
+                                                ) : (
+                                                    <div className="profile-avatar profile-avatar-empty" aria-label="Avatar vacío"></div>
+                                                )}
+                                                <button
+                                                    className="profile-btn-edit-photo"
+                                                    title="Cambiar foto de perfil"
+                                                    onClick={() => { setPhotoInput(fotoUrl || ''); setShowPhotoModal(true); }}
+                                                >
+                                                        +
+                                                </button>
                     </div>
                     <div className="profile-text">
                         <h2>{usuarioLogueado.fullName}</h2>
@@ -55,6 +95,14 @@ export default function MyProfileScreen({ user }) {
                     </div>
                 </div>
             </div>
+
+                        {/* Modal manejado por componente reutilizable */}
+                        <ProfilePhotoModal
+                          isOpen={showPhotoModal}
+                          initialUrl={photoInput}
+                          onClose={() => setShowPhotoModal(false)}
+                          onSave={(url) => { saveProfilePhoto(url); setShowPhotoModal(false); }}
+                        />
 
             {/* MENÚ DE APARTADOS TIPO DASHBOARD */}
             <div className="dashboard-tabs">

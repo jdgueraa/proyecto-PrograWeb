@@ -123,6 +123,20 @@ body {
 .search-box-container {
   position: relative;
   max-width: 600px;
+
+/* Profile photo modal specific styles */
+.modal-card { background:var(--surface); padding:20px; border-radius:var(--radius-md); width:360px; box-shadow:var(--shadow-md) }
+.modal-card h3 { margin:0 0 12px 0; font-family:var(--font-sans); font-size:18px; font-weight:700; color:var(--text-dark) }
+.modal-input { width:100%; padding:10px; margin-bottom:12px; border-radius:var(--radius-md); border:1px solid var(--border); font-family: var(--font-sans); background:var(--surface); outline:none; transition:all 0.2s ease }
+.modal-input:focus { border-color:var(--green-mid); box-shadow:0 0 0 3px rgba(45,155,111,0.1) }
+.modal-preview { margin-bottom:6px; text-align:center }
+.modal-preview img { max-width:80px; max-height:40px; border-radius:var(--radius-md) }
+.modal-error { color:#dc2626; margin-bottom:8px; font-size:13px; font-family:var(--font-sans) }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end }
+.btn-cancel { padding:8px 12px; border-radius:var(--radius-md); border:1px solid var(--border); background:var(--surface); font-family:var(--font-sans); cursor:pointer; transition:all 0.2s }
+.btn-cancel:hover { background:var(--bg); color:var(--green-mid) }
+.btn-save { padding:8px 12px; border-radius:var(--radius-md); border:none; background:var(--green-deep); color:#fff; font-family:var(--font-sans); font-weight:600; cursor:pointer; transition:all 0.2s }
+.btn-save:hover { background:var(--green-mid) }
   margin: 0 auto 24px auto;
 }
 
@@ -585,6 +599,13 @@ body {
   font-weight: 400;
   color: var(--green-deep);
   margin-bottom: 50px;
+}
+
+.profile-page-title {
+  color: var(--green-deep);
+  font-family: var(--font-sans);
+  font-weight: 800;
+  margin-bottom: 24px;
 }
 
 .profile-hero {
