@@ -1726,3 +1726,167 @@ body {
 .ong-prof-gallery-img:hover {
   transform: scale(1.02);
 }
+
+/* ─── Seguimiento ─── */
+/* --- CONTENEDORES DEL SEGUIMIENTO --- */
+.seguimiento-container {
+  border: 3px solid #bdf1b0; /* Borde verde claro característico de tu boceto */
+}
+
+.seguimiento-container h3 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+/* Grilla de KPIs superiores (Métricas rápidas) */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.kpi-card {
+  background-color: #f8fbf9;
+  border: 1px solid #e2f0e7;
+  padding: 15px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.kpi-title {
+  font-size: 13px;
+  color: #7f8c8d;
+  margin-bottom: 5px;
+}
+
+.kpi-value {
+  font-size: 22px;
+  font-weight: bold;
+  color: #27ae60;
+}
+
+/* Distribución de cajas de gráficos */
+.graphics-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 25px;
+}
+
+@media (max-width: 768px) {
+  .graphics-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-box {
+  background-color: white;
+  border: 1px solid #edf2f0;
+  padding: 20px;
+  border-radius: 15px;
+}
+
+.chart-box h4 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.chart-subtitle {
+  margin: 0 0 20px 0;
+  font-size: 12px;
+  color: #95a5a6;
+}
+
+/* --- GRÁFICO DE BARRAS DE HORAS (PURE CSS) --- */
+.bar-chart-pure {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bar-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+.bar-track {
+  background-color: #f0f3f1;
+  height: 25px;
+  border-radius: 6px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.bar-fill-color {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+  border-radius: 6px;
+  transition: width 1s ease-in-out;
+}
+
+.color-verde { background-color: #2ecc71; }
+.color-rojo { background-color: #e74c3c; }
+
+.bar-percentage {
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* --- COMPARATIVA DE APORTES DE CAMPAÑA --- */
+.campaign-compare-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.campaign-compare-item {
+  background-color: #fafbfc;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px dashed #dcdfe1;
+}
+
+.campaign-compare-item h5 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+.comparison-badges {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.badge-user {
+  color: #27ae60;
+  background-color: #e8f8f5;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.badge-global {
+  color: #7f8c8d;
+}
+
+.comparison-footer {
+  margin: 8px 0 0 0;
+  font-size: 11px;
+  color: #95a5a6;
+  font-style: italic;
+}

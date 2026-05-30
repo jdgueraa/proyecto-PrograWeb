@@ -451,8 +451,38 @@
       "username": "amante_gatitos55",
       "role": "persona",
       "creditos": 350,
-      "donaciones": [],
-      "voluntariadosPostulados": []
+      "donaciones": [],      
+      "historialVoluntariados": [
+    {
+      "ongId": 1,
+      "ongName": "Tierra Verde Perú",
+      "campañaId": 1,
+      "horasAportadas": 18,
+      "fechaParticipacion": "2026-04-15"
+    },
+    {
+      "ongId": 3,
+      "ongName": "Salud Para Todos",
+      "campañaId": 4,
+      "horasAportadas": 9,
+      "fechaParticipacion": "2026-05-10"
+    }
+  ],
+
+  "historialDonaciones": [
+    {
+      "ongId": 1,
+      "campañaId": 1,
+      "monto": 80.00,
+      "fecha": "2026-04-02"
+    },
+    {
+      "ongId": 3,
+      "campañaId": 5,
+      "monto": 50.00,
+      "fecha": "2026-05-20"
+    }
+  ]
     }
   ]
 }
