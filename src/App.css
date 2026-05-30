@@ -579,10 +579,12 @@ body {
 }
 
 /* ─── MI PERFIL ─── */
-.profile-dashboard {
-  padding: 20px;
-  background-color: #f4fbf7;
-  min-height: 100vh;
+.profile-dashboard h1{
+  font-family: var(--font-serif);
+  font-size: 70px;
+  font-weight: 400;
+  color: var(--green-deep);
+  margin-bottom: 50px;
 }
 
 .profile-hero {
@@ -594,7 +596,7 @@ body {
 }
 
 .profile-banner {
-  height: 200px;
+  height: 202px;
   background-size: cover;
   background-position: center;
   background-color: #aae899;
@@ -603,10 +605,10 @@ body {
 .profile-info-strip {
   display: flex;
   align-items: center;
-  padding: 0px 25px 40px 25px;
+  padding: 10px 25px 15px 25px;
   gap: 50px;
   position: relative;
-  margin-top: -100px;
+  margin-top: -20px;
 }
 
 .profile-avatar-container {
@@ -661,18 +663,18 @@ body {
 
 .profile-text {
   display: flex;
-  flex-direction: column;
+  flex-direction: column;  
 }
 
 .profile-text h2 {
-  margin: 70px 50px 10px 0;
+  margin: 20px 100px 5px -20px;
   font-size: 24px;
   color: #333;
   font-weight: 700;
 }
 
 .profile-text p {
-  margin: 0px 10px;
+  margin: 0px 0px 0px -100px;
   color: #666;
   font-style: italic;
   font-size: 14px;
