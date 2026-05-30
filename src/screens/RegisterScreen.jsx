@@ -23,7 +23,6 @@ export default function RegisterScreen() {
 function handleRegister() {
   setError('');
   setSuccess('');
-
   if (!nombre.trim() || !email.trim() || !password) {
     setError('Completa todos los campos.');
     return;
@@ -33,6 +32,17 @@ function handleRegister() {
 
   if (!emailValue.includes('@') || !emailValue.includes('.')) {
     setError('Correo inválido.');
+    return;
+  }
+
+  // Validación de contraseña: mínimo 8 caracteres y al menos una mayúscula
+  if (password.length < 8) {
+    setError('La contraseña debe tener al menos 8 caracteres.');
+    return;
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    setError('La contraseña debe contener al menos una letra mayúscula.');
     return;
   }
 
