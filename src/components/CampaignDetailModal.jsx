@@ -118,13 +118,13 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
 
         <div className="modal-section">
           <h4 className="modal-section-title">Recaudación</h4>
-          <div className="modal-progress-numbers">
-            <div>
-              <span className="modal-amount-big">S/. {campaña.actual.toLocaleString()}</span>
-              <span className="modal-amount-label"> recaudados</span>
-            </div>
-            <span className="modal-pct-big">{pct}%</span>
-          </div>
+          <div className="admin-progress-row">
+          <span className="admin-progress-money">
+          S/. {c.actual.toLocaleString()} / {c.meta.toLocaleString()}
+          </span>
+
+  <strong className="admin-progress-percent">{pct}%</strong>
+</div>
           <div className="donations-progress-bar-bg modal-progress-bar">
             <div
               className="donations-progress-bar-fill"
