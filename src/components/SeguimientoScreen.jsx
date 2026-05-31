@@ -6,7 +6,6 @@ export default function SeguimientoScreen({ user }) {
     const historialVoluntariados = user?.historialVoluntariados || [];
     const historialDonaciones = user?.historialDonaciones || [];
 
-    
 
     // Suma total
     const totalHorasDonadas = historialVoluntariados.reduce((suma, item) => suma + item.horasAportadas, 0);
@@ -14,7 +13,8 @@ export default function SeguimientoScreen({ user }) {
     // Donacion totales
     const misDonacionesTotales = historialDonaciones.reduce((suma, item) => suma + item.monto, 0);
 
-    // GRÁFICO 1    
+
+
     const horasTierraVerde = historialVoluntariados
         .filter(item => item.ongId === 1)
         .reduce((suma, item) => suma + item.horasAportadas, 0);
@@ -85,8 +85,10 @@ export default function SeguimientoScreen({ user }) {
 
                     <div className="campaign-compare-list">
 
-                        {historialDonaciones.map((donacion, index) => {                            
+                        {historialDonaciones.map((donacion, index) => {
+                            // BUSQUEDA DINÁMICA
                             const globalCamp = campañas.find(c => c.id === donacion.campañaId);
+
                             if (!globalCamp) return null;
                             //porcentaje global de recaudación de la campaña
                             const porcentajeGlobal = (globalCamp.actual / globalCamp.meta) * 100;                            
@@ -99,7 +101,8 @@ export default function SeguimientoScreen({ user }) {
                                         <span className="badge-user">Tú donaste: <strong>S/. {donacion.monto.toFixed(2)}</strong></span>
                                         <span className="badge-global">Total Campaña: <strong>S/. {globalCamp.actual} / S/. {globalCamp.meta}</strong></span>
                                     </div>
-                                    <div className="progress-bar-container">                                        
+                                    <div className="progress-bar-container">
+                                        
                                         <div
                                             className="progress-bar-fill"
                                             style={{

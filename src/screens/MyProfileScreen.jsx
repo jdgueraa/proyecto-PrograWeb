@@ -13,7 +13,7 @@ export default function MyProfileScreen({ user }) {
         ? "https://img.buzzfeed.com/buzzfeed-static/static/2025-03/13/18/subbuzz/UjLcjUoUE0.jpg?downsize=700%3A%2A&output-quality=auto&output-format=auto"
         : '';
 
-    // Cargar foto guardada en localStorage si existe para este usuario
+
     let initialFoto = defaultFotoUrl;
     try {
         const stored = JSON.parse(localStorage.getItem('registeredUser'));
@@ -21,14 +21,13 @@ export default function MyProfileScreen({ user }) {
             initialFoto = stored.photoUrl;
         }
     } catch (e) {
-        // ignore
+
     }
 
     const [fotoUrl, setFotoUrl] = useState(initialFoto);
     const [showPhotoModal, setShowPhotoModal] = useState(false);
     const [photoInput, setPhotoInput] = useState('');
 
-    // Guarda la URL en estado y en localStorage para persistirla
     function saveProfilePhoto(url) {
         setFotoUrl(url);
         try {
@@ -38,7 +37,7 @@ export default function MyProfileScreen({ user }) {
                 localStorage.setItem('registeredUser', JSON.stringify(stored));
             }
         } catch (e) {
-            // si falla, no bloqueamos la experiencia
+
         }
     }
 
@@ -121,7 +120,7 @@ export default function MyProfileScreen({ user }) {
             {activeTab === 'actividad' && (
                 <div className="dashboard-grid">
 
-                    {/* ONGs Ayudadas */}
+                    {/* BLOQUE IZQUIERDO: ONGs Ayudadas*/}
                     <div className="dashboard-section ongs-ayudadas-box">
                         <h3>ONG ayudadas:</h3>
                         <div className="ongs-list">
@@ -144,7 +143,7 @@ export default function MyProfileScreen({ user }) {
                         </div>
                     </div>
 
-                    {/* Campaña más reciente */}
+                    {/* BLOQUE DERECHO: Campaña más reciente*/}
                     {campañaReciente && (
                         <div className="dashboard-section campaña-reciente-box">
                             <span className="section-subtitle">Campaña más reciente:</span>
