@@ -8,7 +8,7 @@ export default function MyProfileScreen({ user }) {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('actividad');
 
-
+    // Estado para la foto y el modal 
     const defaultFotoUrl = user?.email?.toLowerCase() === 'amante.de.gatitos55@example.com'
         ? "https://img.buzzfeed.com/buzzfeed-static/static/2025-03/13/18/subbuzz/UjLcjUoUE0.jpg?downsize=700%3A%2A&output-quality=auto&output-format=auto"
         : '';
@@ -45,28 +45,30 @@ export default function MyProfileScreen({ user }) {
         return <Navigate to="/login" replace />;
     }
 
-    const isDefaultProfile = user.email?.toLowerCase() === 'amante.de.gatitos55@example.com';
-        
-    
+    // Datos de gatito55
+    const isDefaultProfile = user.email?.toLowerCase() === 'amante.de.gatitos55@example.com'; 
 
     const usuarioLogueado = {
         fullName: user.fullName || user.username || (user.email || '').split('@')[0],
         username: user.username || (user.email || '').split('@')[0],
-        biografia: isDefaultProfile ? "Lo que disfruto es poder ayudar a la gente" : '',
+        biografia: isDefaultProfile ? "Lo que disfruto es poder ayudar a la gente" : '',        
         fotoUrl: isDefaultProfile ? defaultFotoUrl : '',
-        bannerUrl: "https://www.revista-ballesol.com/wp-content/uploads/2024/02/ONG-840x559.jpg", 
+        bannerUrl: "https://www.revista-ballesol.com/wp-content/uploads/2024/02/ONG-840x559.jpg", // Imagen de fondo para el banner
         ongsSeguidasIds: [1, 3],             
     };
 
 
+
+    // Filtracion de las ONGs
     const misOngsAyudadas = ongs.filter(ong => usuarioLogueado.ongsSeguidasIds.includes(ong.id));
 
+    // Campaña reciente de user
     const campañaReciente = campañas[0];
 
     return (
         <div className="profile-dashboard">
             <h1 className="profile-page-title">Mi perfil</h1>
-            {/* BANNER Y DETALLES DE USUARIO */}
+            {/* BANNER DE USUARIO */}
             <div className="profile-hero">
                 <div className="profile-banner" style={{ backgroundImage: `url(${usuarioLogueado.bannerUrl})` }}></div>
                 <div className="profile-info-strip">
@@ -101,7 +103,7 @@ export default function MyProfileScreen({ user }) {
                 onSave={(url) => { saveProfilePhoto(url); setShowPhotoModal(false); }}
             />
 
-            {/* MENÚ DE APARTADOS TIPO DASHBOARD */}
+            {/* uso de useState */}
             <div className="dashboard-tabs">
                 <button className={`tab-btn ${activeTab === 'actividad' ? 'active' : ''}`} onClick={() => setActiveTab('actividad')}>
                     Mi Actividad
@@ -114,7 +116,7 @@ export default function MyProfileScreen({ user }) {
                 </button>
             </div>
 
-            {/* CONTENIDO DINÁMICO SEGÚN LA PESTAÑA */}
+            {/* Segmentos */}
             {activeTab === 'actividad' && (
                 <div className="dashboard-grid">
 
@@ -124,8 +126,7 @@ export default function MyProfileScreen({ user }) {
                         <div className="ongs-list">
                             {misOngsAyudadas.map((ong) => (
                                 <div key={ong.id} className="ong-row-item">
-                                    <div className="ong-row-left">
-                                        {/* Usamos el emoji que definieron en su base de datos */}
+                                    <div className="ong-row-left">                                        
                                         <div className="ong-row-emoji" style={{ backgroundColor: ong.color }}>
                                             {ong.emoji}
                                         </div>
@@ -147,8 +148,7 @@ export default function MyProfileScreen({ user }) {
                         <div className="dashboard-section campaña-reciente-box">
                             <span className="section-subtitle">Campaña más reciente:</span>
                             <h3>{campañaReciente.name}</h3>
-
-                            {/* Card o bloque visual de la campaña */}
+                            
                             <div className="campaña-preview-card">
                                 <div className="campaña-image-placeholder">
                                     <img src="https://www.rcrperu.com/wp-content/uploads/2024/10/200-ARBOLES-FUERON-PLANTADOS-EN-CARABAYLLO-GRACIAS-A-CAMPANA-DE-REFORESTACION-DE-LENOVO-Y-ONG-RECICLA-LATAM.png" alt="Equipo reunida para la campaña 🌱" />
