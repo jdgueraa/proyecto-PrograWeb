@@ -3,21 +3,18 @@ import { campañas } from '../data.json'; // Importamos las campañas globales p
 
 export default function SeguimientoScreen({ user }) {
 
-    // 1. OBTENER HISTORIALES DESDE EL USUARIO LOGUEADO
-    // Si por alguna razón el JSON no tiene los arreglos, usamos un arreglo vacío `[]` por defecto
     const historialVoluntariados = user?.historialVoluntariados || [];
     const historialDonaciones = user?.historialDonaciones || [];
 
-    // 2. CÁLCULOS DINÁMICOS MEDIANTE MÉTODOS DE JAVASCRIPT (.reduce)
+    
 
-    // Sumamos todas las horas aportadas en el historial de voluntariados
+    // Suma total
     const totalHorasDonadas = historialVoluntariados.reduce((suma, item) => suma + item.horasAportadas, 0);
 
-    // Sumamos todos los montos de dinero aportados en el historial de donaciones
+    // Donacion totales
     const misDonacionesTotales = historialDonaciones.reduce((suma, item) => suma + item.monto, 0);
 
-    // 3. PROCESAR HORAS POR ONG PARA EL GRÁFICO 1
-    // Filtramos y sumamos las horas específicamente para Tierra Verde (ID 1) y Salud Para Todos (ID 3)
+    // GRÁFICO 1    
     const horasTierraVerde = historialVoluntariados
         .filter(item => item.ongId === 1)
         .reduce((suma, item) => suma + item.horasAportadas, 0);
@@ -26,7 +23,7 @@ export default function SeguimientoScreen({ user }) {
         .filter(item => item.ongId === 3)
         .reduce((suma, item) => suma + item.horasAportadas, 0);
 
-    // Calculamos los porcentajes de las barras (evitando dividir entre 0 si no hay horas)
+    // Porcentaje barra
     const porcentajeBarraVerde = totalHorasDonadas > 0 ? (horasTierraVerde / totalHorasDonadas) * 100 : 0;
     const porcentajeBarraRoja = totalHorasDonadas > 0 ? (horasSaludParaTodos / totalHorasDonadas) * 100 : 0;
 
@@ -35,8 +32,7 @@ export default function SeguimientoScreen({ user }) {
         <div className="dashboard-section seguimiento-container animate-fade">
             <h3>📈 Mi Panel de Impacto Social (Dinámico)</h3>
             <p className="section-desc">Aquí puedes ver el seguimiento estadístico generado automáticamente desde tu historial de aportes.</p>
-
-            {/* TARJETAS DE RESUMEN AUTOMÁTICAS */}
+            
             <div className="kpi-grid">
                 <div className="kpi-card">
                     <span className="kpi-title">Mis Créditos Disponibles</span>
@@ -54,13 +50,13 @@ export default function SeguimientoScreen({ user }) {
 
             <div className="graphics-layout">
 
-                {/* GRÁFICO 1: HORAS INDIVIDUALES POR ORGANIZACIÓN */}
+                {/* GRÁFICO 1: horas por ong */}
                 <div className="chart-box">
                     <h4>⏱️ Mis Horas de Voluntariado por ONG</h4>
                     <p className="chart-subtitle">Distribución real de tus {totalHorasDonadas} horas aportadas en campo.</p>
 
                     <div className="bar-chart-pure">
-                        {/* Barra para Tierra Verde (Id 1) */}
+                        {/* Barra para Tierra Verde */}
                         <div className="bar-group">
                             <span className="bar-label">🌱 Tierra Verde Perú</span>
                             <div className="bar-track">
@@ -70,7 +66,7 @@ export default function SeguimientoScreen({ user }) {
                             </div>
                         </div>
 
-                        {/* Barra para Salud Para Todos (Id 3) */}
+                        {/* Barra para Salud Para Todos */}
                         <div className="bar-group">
                             <span className="bar-label">🏥 Salud Para Todos</span>
                             <div className="bar-track">
@@ -82,23 +78,18 @@ export default function SeguimientoScreen({ user }) {
                     </div>
                 </div>
 
-                {/* GRÁFICO 2: MI APORTE INDIVIDUAL VS PROGRESO GLOBAL DE LAS CAMPAÑAS */}
+                {/* GRÁFICO 2: aporte individual */}
                 <div className="chart-box">
                     <h4>💰 Mis Donaciones vs. Progreso Global</h4>
                     <p className="chart-subtitle">Tu colaboración cruzada con el estado actual de las campañas en las que participas.</p>
 
                     <div className="campaign-compare-list">
 
-                        {historialDonaciones.map((donacion, index) => {
-                            // BUSQUEDA DINÁMICA: Buscamos en el arreglo global de campañas la que coincida con el id del historial
+                        {historialDonaciones.map((donacion, index) => {                            
                             const globalCamp = campañas.find(c => c.id === donacion.campañaId);
-
-                            // Si no encuentra la campaña en el JSON por seguridad, no renderizamos nada roto
                             if (!globalCamp) return null;
-
-                            // Calculamos el porcentaje global de recaudación de la campaña
-                            const porcentajeGlobal = (globalCamp.actual / globalCamp.meta) * 100;
-                            // Calculamos qué porcentaje representa el dinero de este usuario frente al pozo actual
+                            //porcentaje global de recaudación de la campaña
+                            const porcentajeGlobal = (globalCamp.actual / globalCamp.meta) * 100;                            
                             const porcentajeUsuario = (donacion.monto / globalCamp.actual) * 100;
 
                             return (
@@ -108,8 +99,7 @@ export default function SeguimientoScreen({ user }) {
                                         <span className="badge-user">Tú donaste: <strong>S/. {donacion.monto.toFixed(2)}</strong></span>
                                         <span className="badge-global">Total Campaña: <strong>S/. {globalCamp.actual} / S/. {globalCamp.meta}</strong></span>
                                     </div>
-                                    <div className="progress-bar-container">
-                                        {/* La barra se pinta usando el color dinámico correspondiente a la ONG */}
+                                    <div className="progress-bar-container">                                        
                                         <div
                                             className="progress-bar-fill"
                                             style={{
