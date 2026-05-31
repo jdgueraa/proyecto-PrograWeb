@@ -152,9 +152,10 @@ export default function App() {
         <Route path="/"         element={<LoginScreen onLogin={handleLogin} />} />
         <Route path="/login"    element={<LoginScreen onLogin={handleLogin} />} />
         <Route path="/registro" element={<RegisterScreen />} />
-
         <Route path="/home" element={
-          <AppLayout user={authUser} onLogout={handleLogout}><HomeScreen /></AppLayout>
+        authUser?.role === 'ong'
+        ? <Navigate to="/admin" replace />
+        : <AppLayout user={authUser} onLogout={handleLogout}><HomeScreen /></AppLayout>
         } />
         <Route path="/buscar" element={
           <AppLayout user={authUser} onLogout={handleLogout}><SearchScreen /></AppLayout>
@@ -162,11 +163,14 @@ export default function App() {
         <Route path="/perfil/:id" element={
           <AppLayout user={authUser} onLogout={handleLogout}><ProfileScreen /></AppLayout>
         } />
-        <Route path="/MiPerfil" element={
-          authUser
-            ? <AppLayout user={authUser} onLogout={handleLogout}><MyProfileScreen user={authUser} /></AppLayout>
-            : <Navigate to="/login" replace />
+    
+        <Route path="/MiPerfil" element={authUser
+        ? <AppLayout user={authUser} onLogout={handleLogout}>
+        <MyProfileScreen user={authUser} onUpdateUser={handleUpdateUser} />
+        </AppLayout>
+        : <Navigate to="/login" replace />
         } />
+
         <Route path="/donaciones" element={
           <AppLayout user={authUser} onLogout={handleLogout}>
             <DonationsScreen campañas={campañas} user={authUser} onDonate={handleDonate} />
