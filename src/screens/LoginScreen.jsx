@@ -1,13 +1,4 @@
 // src/screens/LoginScreen.jsx
-// ═══════════════════════════════════════════════════════════════
-//  RESPONSABLE: [Nombre del Amigo 1]
-//  RUTA:        /login
-//  DESCRIPCIÓN: Pantalla de inicio de sesión.
-//
-//  Para navegar a otras pantallas usa useNavigate():
-//    navigate('/home')     → va al home
-//    navigate('/registro') → va al registro
-// ═══════════════════════════════════════════════════════════════
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -32,7 +23,6 @@ export default function LoginScreen({ onLogin }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       
-      {/* ↓↓↓ REEMPLAZA TODO ESTE BLOQUE CON TU DISEÑO ↓↓↓ */}
       <div style={{ textAlign: 'center', padding: '40px', background: '#fff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', minWidth: '320px' }}>
         <div style={{ fontSize: '48px', marginBottom: '8px' }}>🌿</div>
         <h2 style={{ marginBottom: '8px', color: '#1a6b4a' }}>Iniciar Sesión</h2>
@@ -75,8 +65,7 @@ export default function LoginScreen({ onLogin }) {
           ¿No tienes cuenta? Regístrate
         </button>
       </div>
-      {/* ↑↑↑ HASTA AQUÍ ↑↑↑ */}
-
+ 
     </div>
   );
 }

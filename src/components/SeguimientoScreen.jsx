@@ -3,12 +3,9 @@ import { campañas } from '../data.json'; // Importamos las campañas globales p
 
 export default function SeguimientoScreen({ user }) {
 
-    // 1. OBTENER HISTORIALES DESDE EL USUARIO LOGUEADO
-    // Si por alguna razón el JSON no tiene los arreglos, usamos un arreglo vacío `[]` por defecto
     const historialVoluntariados = user?.historialVoluntariados || [];
     const historialDonaciones = user?.historialDonaciones || [];
 
-    // 2. CÁLCULOS DINÁMICOS MEDIANTE MÉTODOS DE JAVASCRIPT (.reduce)
 
     // Sumamos todas las horas aportadas en el historial de voluntariados
     const totalHorasDonadas = historialVoluntariados.reduce((suma, item) => suma + item.horasAportadas, 0);
@@ -16,8 +13,8 @@ export default function SeguimientoScreen({ user }) {
     // Sumamos todos los montos de dinero aportados en el historial de donaciones
     const misDonacionesTotales = historialDonaciones.reduce((suma, item) => suma + item.monto, 0);
 
-    // 3. PROCESAR HORAS POR ONG PARA EL GRÁFICO 1
-    // Filtramos y sumamos las horas específicamente para Tierra Verde (ID 1) y Salud Para Todos (ID 3)
+
+
     const horasTierraVerde = historialVoluntariados
         .filter(item => item.ongId === 1)
         .reduce((suma, item) => suma + item.horasAportadas, 0);
@@ -90,10 +87,9 @@ export default function SeguimientoScreen({ user }) {
                     <div className="campaign-compare-list">
 
                         {historialDonaciones.map((donacion, index) => {
-                            // BUSQUEDA DINÁMICA: Buscamos en el arreglo global de campañas la que coincida con el id del historial
+                            // BUSQUEDA DINÁMICA
                             const globalCamp = campañas.find(c => c.id === donacion.campañaId);
 
-                            // Si no encuentra la campaña en el JSON por seguridad, no renderizamos nada roto
                             if (!globalCamp) return null;
 
                             // Calculamos el porcentaje global de recaudación de la campaña
@@ -109,7 +105,7 @@ export default function SeguimientoScreen({ user }) {
                                         <span className="badge-global">Total Campaña: <strong>S/. {globalCamp.actual} / S/. {globalCamp.meta}</strong></span>
                                     </div>
                                     <div className="progress-bar-container">
-                                        {/* La barra se pinta usando el color dinámico correspondiente a la ONG */}
+                                        
                                         <div
                                             className="progress-bar-fill"
                                             style={{

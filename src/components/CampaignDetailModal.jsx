@@ -18,6 +18,7 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
   }, [onClose]);
 
   if (!campaña) return null;
+  const c = campaña;
 
   const pct      = Math.min(100, Math.round((campaña.actual / campaña.meta) * 100));
   const lograda  = campaña.badge === '¡Lograda!';

@@ -395,33 +395,53 @@ body {
   color: #1a3a2a;
 }
 
-.home-screen-principal-title {
-  font-size: 36px;
-  margin-bottom: 12px;
-  color: #0f402c;
+.home-principal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #eaf5f0 0%, #dcfce7 100%);
+  border-radius: 24px;
+  margin-bottom: 48px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
+.home-screen-principal-title {
+  font-size: 48px; 
+  font-weight: 800; 
+  color: #0f402c; 
+  margin: 0 0 16px 0;
+  line-height: 1.1;
+  letter-spacing: -1px; 
+}
+
+
 .home-screen-principal-subtitle {
-  color: #2ca876;
-  max-width: 600px;
-  margin: 0 auto 24px auto;
-  font-size: 16px;
-  line-height: 1.5;
+  color: #1a6b4a; 
+  max-width: 700px; 
+  margin: 0 auto 32px auto; 
+  font-size: 18px; 
+  line-height: 1.6;
 }
 
 .home-screen-principal-btn {
-  background-color: #238c62;
+  background-color: #1a6b4a; 
   color: #ffffff;
   font-weight: bold;
-  padding: 12px 28px;
+  padding: 16px 36px; 
   border: none;
-  border-radius: 10px;
+  border-radius: 50px; 
   cursor: pointer;
-  font-size: 15px;
+  font-size: 16px;
+  transition: all 0.3s ease; 
+  box-shadow: 0 4px 14px rgba(26, 107, 74, 0.3); 
 }
 
 .home-screen-principal-btn:hover {
-  background-color: #2ca876;
+  background-color: #0f402c; 
+  transform: translateY(-3px); 
+  box-shadow: 0 6px 20px rgba(26, 107, 74, 0.4);
 }
 
 .home-screen-stats-grid {
