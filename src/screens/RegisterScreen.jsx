@@ -1,12 +1,4 @@
 // src/screens/RegisterScreen.jsx
-// ═══════════════════════════════════════════════════════════════
-//  RESPONSABLE: [Nombre del Amigo 1]
-//  RUTA:        /registro
-//  DESCRIPCIÓN: Pantalla de creación de cuenta.
-//
-//  Para navegar usa useNavigate():
-//    navigate('/login') → vuelve al login tras registrarse
-// ═══════════════════════════════════════════════════════════════
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -71,7 +63,6 @@ function handleRegister() {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
 
-      {/* ↓↓↓ REEMPLAZA TODO ESTE BLOQUE CON TU DISEÑO ↓↓↓ */}
       <div style={{ textAlign: 'center', padding: '40px', background: '#fff', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', minWidth: '320px' }}>
         <div style={{ fontSize: '48px', marginBottom: '8px' }}>🌱</div>
         <h2 style={{ marginBottom: '8px', color: '#1a6b4a' }}>Crear Cuenta</h2>
@@ -124,7 +115,7 @@ function handleRegister() {
         : '#fff',
 
     fontWeight: 'bold',
-    color: '#000', // ← NUEVO
+    color: '#000', 
     cursor: 'pointer',
   }}
 >
@@ -149,7 +140,7 @@ function handleRegister() {
         : '#fff',
 
     fontWeight: 'bold',
-    color: '#000', // ← NUEVO
+    color: '#000', 
     cursor: 'pointer',
   }}
 >
@@ -186,7 +177,6 @@ function handleRegister() {
           ¿Ya tienes cuenta? Inicia sesión
         </button>
       </div>
-      {/* ↑↑↑ HASTA AQUÍ ↑↑↑ */}
 
     </div>
   );

@@ -62,7 +62,7 @@ export default function HomeScreen() {
               key={campaña.id}
               campaña={campaña}
               onCardClick={() => setSelectedCampaña(campaña)}
-              onAction={() => navigate('/donaciones')}
+              onAction={() => navigate(`/perfil/${campaña.ongId}`)}
             />
           ))}
         </div>

@@ -1,7 +1,7 @@
 // src/screens/SearchScreen.jsx
 import React, { useState } from 'react';
 import { ongs, categories } from '../data.json';
-import OngCard from '../components/OngCard'; // Importa el componente de la tarjeta
+import OngCard from '../components/OngCard'; 
 
 export default function SearchScreen() {
   const [query, setQuery] = useState("");

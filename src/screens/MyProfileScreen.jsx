@@ -8,9 +8,11 @@ export default function MyProfileScreen({ user }) {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('actividad');
 
+    // Estado para la foto y el modal 
     const defaultFotoUrl = user?.email?.toLowerCase() === 'amante.de.gatitos55@example.com'
         ? "https://img.buzzfeed.com/buzzfeed-static/static/2025-03/13/18/subbuzz/UjLcjUoUE0.jpg?downsize=700%3A%2A&output-quality=auto&output-format=auto"
         : '';
+
 
     let initialFoto = defaultFotoUrl;
 
@@ -19,7 +21,9 @@ export default function MyProfileScreen({ user }) {
         if (stored && stored.email && user?.email && stored.email.toLowerCase() === user.email.toLowerCase() && stored.photoUrl) {
             initialFoto = stored.photoUrl;
         }
-    } catch (e) {}
+    } catch (e) {
+
+    }
 
     const [fotoUrl, setFotoUrl] = useState(initialFoto);
     const [showPhotoModal, setShowPhotoModal] = useState(false);
@@ -34,31 +38,39 @@ export default function MyProfileScreen({ user }) {
                 stored.photoUrl = url;
                 localStorage.setItem('registeredUser', JSON.stringify(stored));
             }
-        } catch (e) {}
+        } catch (e) {
+
+        }
     }
 
     if (!user) {
         return <Navigate to="/login" replace />;
     }
 
-    const isDefaultProfile = user.email?.toLowerCase() === 'amante.de.gatitos55@example.com';
+    // Datos de gatito55
+    const isDefaultProfile = user.email?.toLowerCase() === 'amante.de.gatitos55@example.com'; 
 
     const usuarioLogueado = {
         fullName: user.fullName || user.username || (user.email || '').split('@')[0],
         username: user.username || (user.email || '').split('@')[0],
-        biografia: isDefaultProfile ? "Lo que disfruto es poder ayudar a la gente" : '',
+        biografia: isDefaultProfile ? "Lo que disfruto es poder ayudar a la gente" : '',        
         fotoUrl: isDefaultProfile ? defaultFotoUrl : '',
-        bannerUrl: "https://www.revista-ballesol.com/wp-content/uploads/2024/02/ONG-840x559.jpg",
-        ongsSeguidasIds: [1, 3],
+        bannerUrl: "https://www.revista-ballesol.com/wp-content/uploads/2024/02/ONG-840x559.jpg", // Imagen de fondo para el banner
+        ongsSeguidasIds: [1, 3],             
     };
 
+
+
+    // Filtracion de las ONGs
     const misOngsAyudadas = ongs.filter(ong => usuarioLogueado.ongsSeguidasIds.includes(ong.id));
+
+    // Campaña reciente de user
     const campañaReciente = campañas[0];
 
     return (
         <div className="profile-dashboard">
             <h1 className="profile-page-title">Mi perfil</h1>
-
+            {/* BANNER DE USUARIO */}
             <div className="profile-hero">
                 <div className="profile-banner" style={{ backgroundImage: `url(${usuarioLogueado.bannerUrl})` }}></div>
 
@@ -101,6 +113,7 @@ export default function MyProfileScreen({ user }) {
                 }}
             />
 
+            {/* uso de useState */}
             <div className="dashboard-tabs">
                 <button className={`tab-btn ${activeTab === 'actividad' ? 'active' : ''}`} onClick={() => setActiveTab('actividad')}>
                     Mi Actividad
@@ -115,15 +128,18 @@ export default function MyProfileScreen({ user }) {
                 </button>
             </div>
 
+            {/* Segmentos */}
             {activeTab === 'actividad' && (
                 <div className="dashboard-grid">
+
+                    {/* BLOQUE IZQUIERDO: ONGs Ayudadas*/}
                     <div className="dashboard-section ongs-ayudadas-box">
                         <h3>ONG ayudadas:</h3>
 
                         <div className="ongs-list">
                             {misOngsAyudadas.map((ong) => (
                                 <div key={ong.id} className="ong-row-item">
-                                    <div className="ong-row-left">
+                                    <div className="ong-row-left">                                        
                                         <div className="ong-row-emoji" style={{ backgroundColor: ong.color }}>
                                             {ong.emoji}
                                         </div>
@@ -142,11 +158,12 @@ export default function MyProfileScreen({ user }) {
                         </div>
                     </div>
 
+                    {/* BLOQUE DERECHO: Campaña más reciente*/}
                     {campañaReciente && (
                         <div className="dashboard-section campaña-reciente-box">
                             <span className="section-subtitle">Campaña más reciente:</span>
                             <h3>{campañaReciente.name}</h3>
-
+                            
                             <div className="campaña-preview-card">
                                 <div className="campaña-image-placeholder">
                                     <img
