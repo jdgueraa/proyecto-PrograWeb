@@ -12,6 +12,7 @@ import MyProfileScreen from './screens/MyProfileScreen.jsx';
 import AdminScreen from './screens/AdminScreen';
 import DonationsScreen from './screens/DonationsScreen';
 import VoluntariadoScreen from './screens/VoluntariadoScreen';
+import ProfileOngScreen from './screens/ProfileOngScreen.jsx';
 
 import dataJson from './data.json';
 
@@ -165,11 +166,11 @@ export default function App() {
         } />
     
         <Route path="/MiPerfil" element={authUser
-        ? <AppLayout user={authUser} onLogout={handleLogout}>
-        <MyProfileScreen user={authUser} onUpdateUser={handleUpdateUser} />
-        </AppLayout>
-        : <Navigate to="/login" replace />
-        } />
+      ? <AppLayout user={authUser} onLogout={handleLogout}>
+        {authUser?.role === 'ong'
+          ? <ProfileOngScreen user={authUser} onUpdateUser={handleUpdateUser} />
+          : <MyProfileScreen user={authUser} />}
+        </AppLayout>: <Navigate to="/login" replace />} />
 
         <Route path="/donaciones" element={
           <AppLayout user={authUser} onLogout={handleLogout}>
