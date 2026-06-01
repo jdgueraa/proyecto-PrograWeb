@@ -75,34 +75,46 @@ export default function App() {
     }
   }
 
+  // Se ejecuta cuando el usuario confirma una donación.
+  // Recibe el id de la campaña y el monto donado.
   function handleDonate(campañaId, amount) {
-    const updatedCampañas = campañas.map(c =>
-      c.id === campañaId
-        ? { ...c, actual: c.actual + amount, donantes: (c.donantes || 0) + 1 }
-        : c
-    );
-    setCampañas(updatedCampañas);
-    localStorage.setItem('campañas_state', JSON.stringify(updatedCampañas));
 
-    const updatedUser = {
+    // PASO 1: Actualizar la campaña donada
+    // Recorremos todas las campañas y, solo a la que coincide con campañaId,
+    // le sumamos el monto al recaudado y le agregamos 1 donante.
+    const campañasActualizadas = campañas.map(c => {
+      if (c.id === campañaId) {
+        return { ...c, actual: c.actual + amount, donantes: c.donantes + 1 };
+      }
+      return c;
+    });
+    setCampañas(campañasActualizadas);
+    localStorage.setItem('campañas_state', JSON.stringify(campañasActualizadas));
+
+    // PASO 2: Descontar créditos al usuario
+    // Creamos una copia del usuario con los créditos reducidos
+    // y la donación agregada a su historial personal.
+    const usuarioActualizado = {
       ...authUser,
-      creditos: (authUser.creditos || 0) - amount,
+      creditos: authUser.creditos - amount,
       donaciones: [
-        ...(authUser.donaciones || []),
+        ...authUser.donaciones,
         { campañaId, amount, fecha: new Date().toISOString() },
       ],
     };
-    handleUpdateUser(updatedUser);
+    handleUpdateUser(usuarioActualizado);
 
-    const log = JSON.parse(localStorage.getItem('donacionesLog') || '[]');
-    log.push({
-      userId: authUser.id || authUser.email,
+    // PASO 3: Guardar registro en el log global
+    // Esto permite que el admin de la ONG vea quién donó y cuánto.
+    const logDonaciones = JSON.parse(localStorage.getItem('donacionesLog') || '[]');
+    logDonaciones.push({
+      userId:   authUser.id || authUser.email,
       userName: authUser.fullName,
       campañaId,
       amount,
       fecha: new Date().toISOString(),
     });
-    localStorage.setItem('donacionesLog', JSON.stringify(log));
+    localStorage.setItem('donacionesLog', JSON.stringify(logDonaciones));
   }
 
   function handlePostular(voluntariadoId) {
@@ -163,15 +175,19 @@ export default function App() {
           <AppLayout user={authUser} onLogout={handleLogout}><SearchScreen /></AppLayout>
         } />
         <Route path="/perfil/:id" element={
-          <AppLayout user={authUser} onLogout={handleLogout}><ProfileScreen /></AppLayout>
+          <AppLayout user={authUser} onLogout={handleLogout}>
+            <ProfileScreen user={authUser} onUpdateUser={handleUpdateUser} />
+          </AppLayout>
         } />
-    
+
         <Route path="/MiPerfil" element={authUser
-      ? <AppLayout user={authUser} onLogout={handleLogout}>
-        {authUser?.role === 'ong'
-          ? <ProfileOngScreen user={authUser} onUpdateUser={handleUpdateUser} />
-          : <MyProfileScreen user={authUser} />}
-        </AppLayout>: <Navigate to="/login" replace />} />
+          ? <AppLayout user={authUser} onLogout={handleLogout}>
+              {authUser?.role === 'ong'
+                ? <ProfileOngScreen user={authUser} onUpdateUser={handleUpdateUser} />
+                : <MyProfileScreen user={authUser} voluntariados={voluntariados} />}
+            </AppLayout>
+          : <Navigate to="/login" replace />
+        } />
 
         <Route path="/donaciones" element={
           <AppLayout user={authUser} onLogout={handleLogout}>

@@ -123,11 +123,13 @@ body {
 .search-box-container {
   position: relative;
   max-width: 600px;
+  margin: 0 auto 24px auto;
+}
 
-/* Profile photo modal specific styles */
+/* ─── MODAL FOTO DE PERFIL ─── */
 .modal-card { background:var(--surface); padding:20px; border-radius:var(--radius-md); width:360px; box-shadow:var(--shadow-md) }
 .modal-card h3 { margin:0 0 12px 0; font-family:var(--font-sans); font-size:18px; font-weight:700; color:var(--text-dark) }
-.modal-input { width:100%; padding:10px; margin-bottom:12px; border-radius:var(--radius-md); border:1px solid var(--border); font-family: var(--font-sans); background:var(--surface); outline:none; transition:all 0.2s ease }
+.modal-input { width:100%; padding:10px; margin-bottom:12px; border-radius:var(--radius-md); border:1px solid var(--border); font-family: var(--font-sans); background:var(--surface); outline:none; transition:all 0.2s ease; color:var(--text-dark) }
 .modal-input:focus { border-color:var(--green-mid); box-shadow:0 0 0 3px rgba(45,155,111,0.1) }
 .modal-preview { margin-bottom:6px; text-align:center }
 .modal-preview img { max-width:80px; max-height:40px; border-radius:var(--radius-md) }
@@ -137,8 +139,6 @@ body {
 .btn-cancel:hover { background:var(--bg); color:var(--green-mid) }
 .btn-save { padding:8px 12px; border-radius:var(--radius-md); border:none; background:var(--green-deep); color:#fff; font-family:var(--font-sans); font-weight:600; cursor:pointer; transition:all 0.2s }
 .btn-save:hover { background:var(--green-mid) }
-  margin: 0 auto 24px auto;
-}
 
 .search-icon {
   position: absolute;
@@ -2484,4 +2484,117 @@ body {
 
 .photo-modal-btn-save:hover {
   background-color: #45a049;
+}
+/* ─── DONATIONS SCREEN: SALDO ─── */
+.donations-saldo-badge {
+  display: inline-block;
+  background: #eaf5f0;
+  border: 1px solid #c6eadb;
+  border-radius: 10px;
+  padding: 8px 18px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a6b4a;
+}
+
+/* ─── MODAL: UTILIDADES ─── */
+.modal-stat-value--small { font-size: 12px; }
+.modal-progress-bar { height: 10px; margin: 10px 0; }
+.donate-section { margin-top: 8px; }
+
+/* ─── MODAL DONACIÓN: ALERTAS ─── */
+.donate-noauth-alert,
+.donate-error-alert {
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+.donate-noauth-alert { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; }
+.donate-error-alert  { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+.donate-noauth-alert button, .donate-error-alert button, .postular-noauth-alert button {
+  background: none; border: none; color: #1a6b4a; font-weight: 700;
+  cursor: pointer; text-decoration: underline; font-size: inherit;
+}
+
+/* ─── MODAL DONACIÓN: ÉXITO ─── */
+.donate-success { background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 16px; text-align: center; }
+.donate-success-icon     { font-size: 32px; margin-bottom: 6px; }
+.donate-success-title    { font-weight: 800; color: #166534; font-size: 15px; margin-bottom: 4px; }
+.donate-success-subtitle { color: #15803d; font-size: 13px; margin: 0; }
+
+/* ─── MODAL DONACIÓN: PANEL DE MONTOS ─── */
+.donate-panel { background: #f8fdfb; border: 1px solid #c6eadb; border-radius: 12px; padding: 16px; }
+.donate-panel-saldo { font-size: 13px; color: #1a6b4a; font-weight: 700; margin-bottom: 12px; text-align: center; }
+.donate-question    { font-size: 13px; color: #374151; margin-bottom: 8px; font-weight: 600; }
+
+.donate-amounts-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+
+.donate-amount-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #c6eadb;
+  background: #fff;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: #1a6b4a;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s ease;
+}
+.donate-amount-btn--active { border: 2px solid #1a6b4a; background: #eaf5f0; }
+
+.donate-custom-input {
+  width: 100%; padding: 10px; border-radius: 8px;
+  border: 1px solid #c6eadb; margin-bottom: 10px;
+  font-size: 14px; font-family: inherit;
+  color: var(--text-dark); box-sizing: border-box;
+}
+
+.donate-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+.donate-confirm-btn {
+  flex: 1; padding: 12px; background: #1a6b4a; color: #fff;
+  border: none; border-radius: 8px; font-family: var(--font-sans);
+  font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.2s;
+}
+.donate-confirm-btn:disabled { background: #d1fae5; cursor: not-allowed; }
+
+.donate-cancel-btn {
+  padding: 12px 16px; background: #fff; color: #6b7280;
+  border: 1px solid #e5e7eb; border-radius: 8px;
+  font-family: var(--font-sans); font-weight: 600; font-size: 14px; cursor: pointer;
+}
+
+/* ─── MODAL POSTULACIÓN: ÉXITO ─── */
+.postular-success { background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 16px; text-align: center; }
+.postular-success-icon     { font-size: 28px; margin-bottom: 4px; }
+.postular-success-title    { font-weight: 800; color: #166534; font-size: 15px; margin-bottom: 4px; }
+.postular-success-subtitle { color: #15803d; font-size: 13px; margin: 0; }
+
+/* ─── MODAL POSTULACIÓN: ALERTA ─── */
+.postular-noauth-alert {
+  background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px;
+  padding: 14px; text-align: center; color: #9a3412; font-size: 14px; font-weight: 600;
+}
+
+/* ─── MODAL POSTULACIÓN: CONFIRMACIÓN ─── */
+.postular-confirm-panel { background: #f8fdfb; border: 1px solid #c6eadb; border-radius: 12px; padding: 20px 16px; text-align: center; }
+.postular-confirm-text  { font-weight: 700; color: #1a6b4a; margin-bottom: 14px; font-size: 15px; }
+.postular-confirm-actions { display: flex; gap: 10px; justify-content: center; }
+
+.postular-confirm-btn-yes {
+  padding: 11px 28px; background: #1a6b4a; color: #fff;
+  border: none; border-radius: 8px; font-family: var(--font-sans);
+  font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.2s;
+}
+.postular-confirm-btn-yes:hover { background: var(--green-mid); }
+
+.postular-confirm-btn-cancel {
+  padding: 11px 18px; background: #fff; color: #6b7280;
+  border: 1px solid #e5e7eb; border-radius: 8px;
+  font-family: var(--font-sans); font-weight: 600; font-size: 14px; cursor: pointer;
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { ongs, campañas } from '../data.json';
+import { ongs, campañas, usuarios } from '../data.json';
 import ProfilePhotoModal from '../components/ProfilePhotoModal.jsx';
 import SeguimientoScreen from '../components/SeguimientoScreen.jsx';
 
@@ -182,7 +182,10 @@ export default function MyProfileScreen({ user }) {
                             <h3>{campañaReciente.name}</h3>
                             <div className="campaña-preview-card">
                                 <div className="campaña-image-placeholder">
-                                    <img src={campañaReciente.imagen} alt="" />
+                                    <img
+                                        src={campañaReciente.imagen || "https://www.rcrperu.com/wp-content/uploads/2024/10/200-ARBOLES-FUERON-PLANTADOS-EN-CARABAYLLO-GRACIAS-A-CAMPANA-DE-REFORESTACION-DE-LENOVO-Y-ONG-RECICLA-LATAM.png"}
+                                        alt="Imagen de la campaña"
+                                    />
                                 </div>
 
                                 <div className="campaña-stats-summary">

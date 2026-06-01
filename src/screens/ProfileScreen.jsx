@@ -6,18 +6,30 @@ import VoluntariadoDetailModal from '../components/VoluntariadoDetailModal';
 
 const MODALIDAD_ICON = { Presencial: '📍', Virtual: '💻', Híbrido: '🔄' };
 
-export default function ProfileScreen() {
-  const [seguido, setSeguido]         = useState(false);
-  const [activeTab, setActiveTab]     = useState('campañas');
+export default function ProfileScreen({ user, onUpdateUser }) {
+  const [activeTab, setActiveTab]               = useState('campañas');
   const [selectedCampaña, setSelectedCampaña]   = useState(null);
-  const [selectedVol, setSelectedVol] = useState(null);
+  const [selectedVol, setSelectedVol]           = useState(null);
   const navigate  = useNavigate();
   const { id }    = useParams();
 
   const ong = ongs.find(o => o.id === parseInt(id)) || ongs[0];
 
-  const ongCampañas     = campañas.filter(c => c.ongId === ong.id);
+  const ongCampañas      = campañas.filter(c => c.ongId === ong.id);
   const ongVoluntariados = voluntariados.filter(v => v.ongId === ong.id);
+
+  // Verifica si el usuario ya sigue esta ONG
+  const seguido = (user?.ongsSeguidasIds || []).includes(ong.id);
+
+  // Alterna seguir / dejar de seguir y guarda en el usuario
+  function toggleSeguir() {
+    if (!user || !onUpdateUser) return;
+    const ids = user.ongsSeguidasIds || [];
+    const nuevasIds = seguido
+      ? ids.filter(i => i !== ong.id)          // quitar
+      : [...ids, ong.id];                       // agregar
+    onUpdateUser({ ...user, ongsSeguidasIds: nuevasIds });
+  }
 
   return (
     <div className="fade-in ong-prof-wrapper">
@@ -52,7 +64,7 @@ export default function ProfileScreen() {
         </div>
         <button
           className={`action-btn-primary ong-prof-follow-btn ${seguido ? 'btn-following' : ''}`}
-          onClick={() => setSeguido(!seguido)}
+          onClick={toggleSeguir}
         >
           {seguido ? '✓ Siguiendo' : '❤️ Seguir'}
         </button>
