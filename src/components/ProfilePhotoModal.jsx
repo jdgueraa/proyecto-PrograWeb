@@ -24,24 +24,60 @@ export default function ProfilePhotoModal({ isOpen, initialUrl = '', onClose, on
 
   return (
     <div className="modal-overlay">
-      <div className="modal-card">
-        <h3>Nueva URL de foto</h3>
-        <input
-          className="modal-input"
-          type="text"
-          placeholder="Pega la URL de la imagen"
-          value={url}
-          onChange={e => { setUrl(e.target.value); setValid(true); }}
-          style={{ border: valid ? undefined : '1px solid #e11' }}
-        />
+      <div className="modal-card photo-modal-card">
+        <button 
+          className="photo-modal-close-btn" 
+          onClick={onClose}
+        >
+          ✕
+        </button>
+
+        <div className="photo-modal-header">
+          <h2>📷 Cambiar foto de perfil</h2>
+          <p>Sube una nueva imagen para tu perfil</p>
+        </div>
+
+        <div className="photo-modal-form-group">
+          <label className="photo-modal-label">
+            URL de la imagen
+          </label>
+          <input
+            className={`photo-modal-input ${!valid ? 'invalid' : ''}`}
+            type="text"
+            placeholder="https://ejemplo.com/imagen.jpg"
+            value={url}
+            onChange={e => { setUrl(e.target.value); setValid(true); }}
+          />
+        </div>
 
         {!valid && (
-          <div className="modal-error">Introduce una URL válida que empiece por http:// o https://</div>
+          <div className="photo-modal-error">
+            <strong>⚠️ URL no válida</strong>
+            <p>La URL debe empezar con <code>http://</code> o <code>https://</code></p>
+          </div>
         )}
 
-        <div className="modal-actions">
-          <button className="btn-cancel" onClick={onClose}>Cancelar</button>
-          <button className="btn-save" onClick={handleSave}>Guardar</button>
+        <div className="photo-modal-tips">
+          <strong>💡 Consejos:</strong>
+          <ul>
+            <li>Usa una imagen cuadrada para mejor resultado</li>
+            <li>La URL debe ser accesible en internet</li>
+          </ul>
+        </div>
+
+        <div className="photo-modal-actions">
+          <button 
+            className="photo-modal-btn-cancel" 
+            onClick={onClose}
+          >
+            Cancelar
+          </button>
+          <button 
+            className="photo-modal-btn-save" 
+            onClick={handleSave}
+          >
+            Guardar foto
+          </button>
         </div>
       </div>
     </div>

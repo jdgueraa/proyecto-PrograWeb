@@ -2263,3 +2263,171 @@ body {
 .ong-edit-form textarea:focus {
   border-color: #168354;
 }
+
+/* ─── PROFILE PHOTO MODAL ─── */
+.photo-modal-card {
+  max-width: 500px;
+  text-align: center;
+}
+
+.photo-modal-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--text-mid);
+}
+
+.photo-modal-close-btn:hover {
+  color: var(--green-deep);
+}
+
+.photo-modal-header {
+  margin-bottom: 24px;
+}
+
+.photo-modal-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  color: #1a1a1a;
+}
+
+.photo-modal-header p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.photo-modal-form-group {
+  margin-bottom: 20px;
+  text-align: left;
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.photo-modal-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.photo-modal-input {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.photo-modal-input:focus {
+  border-color: var(--green-mid);
+  box-shadow: 0 0 0 3px rgba(45, 155, 111, 0.1);
+}
+
+.photo-modal-input.invalid {
+  border-color: #ff4444;
+}
+
+.photo-modal-error {
+  background-color: #ffe8e8;
+  color: #d32f2f;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  border: 1px solid #ffcdd2;
+  text-align: left;
+}
+
+.photo-modal-error strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.photo-modal-error p {
+  margin: 4px 0 0 0;
+}
+
+.photo-modal-error code {
+  background-color: #fce4ec;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.photo-modal-tips {
+  background-color: #e8f5e9;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-bottom: 20px;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+  text-align: left;
+}
+
+.photo-modal-tips strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.photo-modal-tips ul {
+  margin: 6px 0 0 0;
+  padding-left: 20px;
+}
+
+.photo-modal-tips li {
+  margin: 4px 0;
+}
+
+.photo-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.photo-modal-btn-cancel {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #666;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.photo-modal-btn-cancel:hover {
+  background-color: #f5f5f5;
+  border-color: #bbb;
+}
+
+.photo-modal-btn-save {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.photo-modal-btn-save:hover {
+  background-color: #45a049;
+}
