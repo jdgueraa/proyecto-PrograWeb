@@ -84,7 +84,8 @@
       "category": "Medio Ambiente",
       "ongId": 1,
       "ongName": "Tierra Verde Perú",
-      "location": "Loreto, Perú"
+      "location": "Loreto, Perú",
+      "imagen": "https://www.rcrperu.com/wp-content/uploads/2024/10/200-ARBOLES-FUERON-PLANTADOS-EN-CARABAYLLO-GRACIAS-A-CAMPANA-DE-REFORESTACION-DE-LENOVO-Y-ONG-RECICLA-LATAM.png"
     },
     {
       "id": 2,
@@ -104,7 +105,9 @@
       "category": "Educación",
       "ongId": 2,
       "ongName": "Educa Contigo",
-      "location": "Cusco, Perú"
+      "location": "Cusco, Perú",
+      "imagen":" "
+
     },
     {
       "id": 3,
@@ -451,7 +454,9 @@
       "username": "amante_gatitos55",
       "role": "persona",
       "creditos": 350,
-      "donaciones": [],      
+      "donaciones": [],
+      "voluntariadosPostulados": [],
+      "ongseguidas": [1, 3],
       "historialVoluntariados": [
     {
       "ongId": 1,

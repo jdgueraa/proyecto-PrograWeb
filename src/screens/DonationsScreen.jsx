@@ -1,60 +1,85 @@
+// ─────────────────────────────────────────────────────────────
+// DonationsScreen.jsx  —  Pantalla "Donaciones"
+//
+// COMPONENTE USADO:
+//   • CampaignDetailModal  →  popup con detalles de la campaña
+//                             y el flujo para realizar una donación
+//
+// PROPS QUE RECIBE (vienen de App.jsx):
+//   • campañas   →  lista de campañas desde el estado de App
+//   • user       →  usuario logueado (para mostrar saldo y donar)
+//   • onDonate   →  función que descuenta créditos y actualiza la campaña
+//
+// DATOS (data.json):
+//   • categories →  categorías para los botones de filtro
+// ─────────────────────────────────────────────────────────────
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { categories } from '../data.json';
 import CampaignDetailModal from '../components/CampaignDetailModal';
 
+// Opciones del filtro de estado
 const ESTADOS = ['Todas', 'Activas', 'Logradas'];
 
 export default function DonationsScreen({ campañas = [], user, onDonate }) {
   const navigate = useNavigate();
 
+  // Texto libre del buscador
   const [query, setQuery] = useState('');
+
+  // Categoría activa en los filtros (Medio Ambiente, Educación, etc.)
   const [activeCategory, setActiveCategory] = useState('Todas');
+
+  // Estado activo: Todas / Activas / Logradas
   const [activeEstado, setActiveEstado] = useState('Todas');
+
+  // Campaña seleccionada para abrir el modal de detalles
   const [selectedCampaña, setSelectedCampaña] = useState(null);
 
-  const filtered = campañas.filter(function(c) {
-    const textoBuscado = query.toLowerCase();
+  // ── Filtrado ──────────────────────────────────────────────
+  // Una campaña aparece si coincide con el texto, la categoría y el estado
+  const filtered = campañas.filter(c => {
+    const texto = query.toLowerCase();
+
     const coincideTexto =
-      c.name.toLowerCase().includes(textoBuscado) ||
-      c.desc.toLowerCase().includes(textoBuscado) ||
-      c.ongName.toLowerCase().includes(textoBuscado);
+      c.name.toLowerCase().includes(texto) ||
+      c.desc.toLowerCase().includes(texto) ||
+      c.ongName.toLowerCase().includes(texto);
 
     const coincideCategoria = activeCategory === 'Todas' || c.category === activeCategory;
 
-    let coincideEstado = false;
-    if (activeEstado === 'Todas') {
-      coincideEstado = true;
-    } else if (activeEstado === 'Activas' && c.badge === 'Activa') {
-      coincideEstado = true;
-    } else if (activeEstado === 'Logradas' && c.badge === '¡Lograda!') {
-      coincideEstado = true;
-    }
+    const coincideEstado =
+      activeEstado === 'Todas' ||
+      (activeEstado === 'Activas'  && c.badge === 'Activa') ||
+      (activeEstado === 'Logradas' && c.badge === '¡Lograda!');
 
     return coincideTexto && coincideCategoria && coincideEstado;
   });
 
-  let totalRecaudado = 0;
-  const campanasActivas = campañas.filter(c => c.badge === 'Activa');
-  for (let i = 0; i < campanasActivas.length; i++) {
-    totalRecaudado += campanasActivas[i].actual;
-  }
+  // Total recaudado sumando solo las campañas activas
+  const totalRecaudado = campañas
+    .filter(c => c.badge === 'Activa')
+    .reduce((suma, c) => suma + c.actual, 0);
 
   return (
     <div className="fade-in donations-wrapper">
 
+      {/* ── Cabecera: título, saldo, buscador y filtros ── */}
       <header className="donations-header">
         <h1 className="donations-title">Donaciones</h1>
         <p className="donations-subtitle">
           Elige una campaña y contribuye directamente a quienes más lo necesitan.
         </p>
 
+        {/* Muestra el saldo solo si el usuario es persona (no ONG) */}
         {user && user.role !== 'ong' && (
           <div className="donations-saldo-badge">
             💰 Tu saldo: S/. {(user.creditos || 0).toLocaleString()}
           </div>
         )}
 
+        {/* Buscador de texto libre */}
         <div className="search-box-container" style={{ maxWidth: '560px', margin: '0 auto 20px auto' }}>
           <span className="search-icon">🔍</span>
           <input
@@ -67,6 +92,8 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
         </div>
 
         <div className="donations-filters">
+
+          {/* Filtros por categoría (vienen del JSON) */}
           <div className="filter-tags">
             {categories.map(cat => (
               <button
@@ -79,6 +106,7 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
             ))}
           </div>
 
+          {/* Filtros por estado: Todas / Activas / Logradas */}
           <div className="donations-estado-tabs">
             {ESTADOS.map(estado => (
               <button
@@ -93,6 +121,7 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
         </div>
       </header>
 
+      {/* ── Barra de estadísticas ── */}
       <div className="donations-stats-bar">
         <span>
           💰 <strong>S/. {totalRecaudado.toLocaleString()}</strong> recaudados en campañas activas
@@ -103,7 +132,9 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
         </span>
       </div>
 
+      {/* ── Lista de campañas o mensaje vacío ── */}
       {filtered.length === 0 ? (
+
         <div className="donations-empty">
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>🌿</div>
           <p style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-dark)' }}>
@@ -113,18 +144,23 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
             Prueba con otra categoría o quita el filtro de estado
           </p>
         </div>
+
       ) : (
+
         <div className="donations-grid">
           {filtered.map(c => {
+            // Porcentaje recaudado respecto a la meta (máximo 100%)
             const pct = Math.min(100, Math.round((c.actual / c.meta) * 100));
             const lograda = c.badge === '¡Lograda!';
 
             return (
+              // Click en la tarjeta abre el modal de detalles
               <div
                 key={c.id}
                 className={`donations-card card-clickable ${lograda ? 'donations-card--done' : ''}`}
                 onClick={() => setSelectedCampaña(c)}
               >
+                {/* Fila superior: badge de estado, urgencia y categoría */}
                 <div className="donations-card-top">
                   <div className="donations-card-tags">
                     <span className={`campaign-badge ${c.badgeClass}`}>{c.badge}</span>
@@ -136,6 +172,7 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
                 <h3 className="donations-card-name">{c.name}</h3>
                 <p className="donations-card-desc">{c.desc}</p>
 
+                {/* Enlace a la ONG — stopPropagation evita que también abra el modal */}
                 <button
                   className="donations-card-ong-link"
                   onClick={e => { e.stopPropagation(); navigate(`/perfil/${c.ongId}`); }}
@@ -143,6 +180,7 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
                   {c.ongName} · 📍 {c.location}
                 </button>
 
+                {/* Barra de progreso de recaudación */}
                 <div className="donations-progress">
                   <div className="donations-progress-bar-bg">
                     <div
@@ -159,6 +197,7 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
                   </div>
                 </div>
 
+                {/* Botón que abre el modal (el flujo de donación está dentro del modal) */}
                 <button
                   className={`donations-btn ${lograda ? 'donations-btn--done' : ''}`}
                   disabled={lograda}
@@ -166,13 +205,13 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
                 >
                   {lograda ? '✓ Meta alcanzada' : '❤️ Donar ahora'}
                 </button>
-
               </div>
             );
           })}
         </div>
       )}
 
+      {/* Modal de detalles — se muestra solo cuando hay una campaña seleccionada */}
       {selectedCampaña && (
         <CampaignDetailModal
           key={selectedCampaña.id}

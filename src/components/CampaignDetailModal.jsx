@@ -1,6 +1,25 @@
+// ─────────────────────────────────────────────────────────────
+// CampaignDetailModal.jsx  —  Modal de detalle de campaña + donación
+//
+// USADO EN:  DonationsScreen
+//
+// PROPS QUE RECIBE:
+//   • campaña   →  objeto de la campaña seleccionada
+//   • user      →  usuario logueado (para mostrar saldo y validar créditos)
+//   • onDonate  →  función de App.jsx que descuenta créditos y actualiza campaña
+//   • onClose   →  cierra el modal
+//
+// FLUJO DE DONACIÓN:
+//   1. Usuario presiona "Donar ahora"
+//   2. Aparece selector de monto (S/. 10, 25, 50, 100 o personalizado)
+//   3. Si tiene suficientes créditos → se confirma y se muestra mensaje de éxito
+//   4. Si no tiene créditos → se muestra error
+// ─────────────────────────────────────────────────────────────
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Montos de donación rápida que aparecen como botones
 const MONTOS_RAPIDOS = [10, 25, 50, 100];
 
 export default function CampaignDetailModal({ campaña, user, onDonate, onClose }) {
@@ -10,6 +29,8 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
   const [monto, setMonto] = useState('');
   const [montoPersonalizado, setMontoPersonalizado] = useState('');
   const [donationStatus, setDonationStatus] = useState(null);
+  // Guardamos el saldo ANTES de donar para mostrarlo correctamente en el mensaje de éxito
+  const [saldoAntesDonacion, setSaldoAntesDonacion] = useState(0);
 
   useEffect(() => {
     const handleKey = e => { if (e.key === 'Escape') onClose(); };
@@ -36,6 +57,9 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
     if (!user) { setDonationStatus('noauth'); return; }
     if (!montoFinal || montoFinal <= 0) return;
     if ((user.creditos || 0) < montoFinal) { setDonationStatus('error'); return; }
+    // Guardamos el saldo actual ANTES de llamar onDonate,
+    // porque onDonate actualiza el usuario y React re-renderiza con el nuevo saldo
+    setSaldoAntesDonacion(user.creditos || 0);
     onDonate(campaña.id, montoFinal);
     setDonationStatus('success');
   }
@@ -159,7 +183,7 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
                 <div className="donate-success-icon">🎉</div>
                 <p className="donate-success-title">¡Gracias por tu donación de S/. {montoFinal}!</p>
                 <p className="donate-success-subtitle">
-                  Tu nuevo saldo: S/. {((user?.creditos || 0) - montoFinal).toLocaleString()}
+                  Tu nuevo saldo: S/. {(saldoAntesDonacion - montoFinal).toLocaleString()}
                 </p>
               </div>
             )}

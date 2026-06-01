@@ -1,3 +1,21 @@
+// ─────────────────────────────────────────────────────────────
+// VoluntariadoDetailModal.jsx  —  Modal de detalle de voluntariado + postulación
+//
+// USADO EN:  VoluntariadoScreen
+//
+// PROPS QUE RECIBE:
+//   • voluntariado  →  objeto del voluntariado seleccionado
+//   • user          →  usuario logueado (para verificar si ya se postuló)
+//   • onPostular    →  función de App.jsx que registra la postulación
+//   • onClose       →  cierra el modal
+//
+// FLUJO DE POSTULACIÓN:
+//   1. Usuario presiona "Postularme a este voluntariado"
+//   2. Aparece confirmación "¿Confirmar tu postulación?"
+//   3. Si confirma → se registra la postulación y aparece mensaje de éxito
+//   4. Si ya estaba postulado → muestra directamente "¡Postulación enviada!"
+// ─────────────────────────────────────────────────────────────
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
