@@ -11,7 +11,7 @@ export default function MyProfileScreen({ user }) {
     // Estado para la foto y el modal 
     const defaultFotoUrl = user?.email?.toLowerCase() === 'amante.de.gatitos55@example.com'
         ? "https://img.buzzfeed.com/buzzfeed-static/static/2025-03/13/18/subbuzz/UjLcjUoUE0.jpg?downsize=700%3A%2A&output-quality=auto&output-format=auto"
-        : '';
+        : "https://thumbs.dreamstime.com/b/vector-de-perfil-avatar-predeterminado-foto-usuario-medios-sociales-icono-183042379.jpg";
 
 
     let initialFoto = defaultFotoUrl;
@@ -46,24 +46,32 @@ export default function MyProfileScreen({ user }) {
     }
 
     // Datos de gatito55
-    const isDefaultProfile = user.email?.toLowerCase() === 'amante.de.gatitos55@example.com'; 
+    let gatito = null;
+    const isDefaultProfile = user.email?.toLowerCase() === 'amante.de.gatitos55@example.com';
+    if (isDefaultProfile) {
+        gatito = usuarios.find(u => u.id === 3);
+    }
 
     const usuarioLogueado = {
         fullName: user.fullName || user.username || (user.email || '').split('@')[0],
         username: user.username || (user.email || '').split('@')[0],
-        biografia: isDefaultProfile ? "Lo que disfruto es poder ayudar a la gente" : '',        
+        biografia: isDefaultProfile ? "Lo que disfruto es poder ayudar a la gente" : '',
         fotoUrl: isDefaultProfile ? defaultFotoUrl : '',
         bannerUrl: "https://www.revista-ballesol.com/wp-content/uploads/2024/02/ONG-840x559.jpg", // Imagen de fondo para el banner
-        ongsSeguidasIds: [1, 3],             
+        ongsSeguidasIds: isDefaultProfile ? gatito.ongseguidas : [],
+        historialvolun: isDefaultProfile ? gatito.historialVoluntariados : [],
     };
-
 
 
     // Filtracion de las ONGs
     const misOngsAyudadas = ongs.filter(ong => usuarioLogueado.ongsSeguidasIds.includes(ong.id));
 
-    // Campaña reciente de user
-    const campañaReciente = campañas[0];
+    // Campaña reciente de user    
+    const campañaReciente = isDefaultProfile ? campañas[0] : null;
+
+    const misvoluntariado = usuarioLogueado.historialvolun;
+
+
 
     return (
         <div className="profile-dashboard">
@@ -119,39 +127,50 @@ export default function MyProfileScreen({ user }) {
             {/* Segmentos */}
             {activeTab === 'actividad' && (
                 <div className="dashboard-grid">
-
                     {/* BLOQUE IZQUIERDO: ONGs Ayudadas*/}
                     <div className="dashboard-section ongs-ayudadas-box">
-                        <h3>ONG ayudadas:</h3>
-                        <div className="ongs-list">
-                            {misOngsAyudadas.map((ong) => (
-                                <div key={ong.id} className="ong-row-item">
-                                    <div className="ong-row-left">                                        
-                                        <div className="ong-row-emoji" style={{ backgroundColor: ong.color }}>
-                                            {ong.emoji}
+                        {campañaReciente ? (
+                            <div>
+                                <h3>ONG ayudadas:</h3>
+                                <div className="ongs-list">
+                                    {misOngsAyudadas.map((ong) => (
+                                        <div key={ong.id} className="ong-row-item">
+                                            <div className="ong-row-left">
+                                                <div className="ong-row-emoji" style={{ backgroundColor: ong.color }}>
+                                                    {ong.emoji}
+                                                </div>
+                                                <div className="ong-row-details">
+                                                    <h4>{ong.name}</h4>
+                                                    <p>{ong.location}</p>
+                                                </div>
+                                            </div>
+                                            <button className="ver-perfil-link" onClick={() => navigate(`/perfil/${ong.id}`)}>
+                                                Ver perfil
+                                            </button>
                                         </div>
-                                        <div className="ong-row-details">
-                                            <h4>{ong.name}</h4>
-                                            <p>{ong.location}</p>
-                                        </div>
-                                    </div>
-                                    <button className="ver-perfil-link" onClick={() => navigate(`/perfil/${ong.id}`)}>
-                                        Ver perfil
-                                    </button>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            </div>) : (
+                            <div className="dashboard-section empty-state">
+                                <h3>Aún no has apoyado a ninguna ONG</h3>
+                                <p>Para poder demostrar que ONG sigues, haz click en el siguiente botón para encontrar a quién ayudar</p>
+                                <button className="home-screen-principal-btn" onClick={() => navigate('/buscar')}>
+                                    ✨ ¡Busca ahora!
+                                </button>
+                            </div>
+                        )}
+
+
                     </div>
 
                     {/* BLOQUE DERECHO: Campaña más reciente*/}
-                    {campañaReciente && (
+                    {campañaReciente ? (
                         <div className="dashboard-section campaña-reciente-box">
                             <span className="section-subtitle">Campaña más reciente:</span>
                             <h3>{campañaReciente.name}</h3>
-                            
                             <div className="campaña-preview-card">
                                 <div className="campaña-image-placeholder">
-                                    <img src="https://www.rcrperu.com/wp-content/uploads/2024/10/200-ARBOLES-FUERON-PLANTADOS-EN-CARABAYLLO-GRACIAS-A-CAMPANA-DE-REFORESTACION-DE-LENOVO-Y-ONG-RECICLA-LATAM.png" alt="Equipo reunida para la campaña 🌱" />
+                                    <img src={campañaReciente.imagen} alt="" />
                                 </div>
                                 <div className="campaña-stats-summary">
                                     <span className={`badge ${campañaReciente.badgeClass}`}>
@@ -168,10 +187,18 @@ export default function MyProfileScreen({ user }) {
                                         Recaudado: <strong>S/. {campañaReciente.actual}</strong> de S/. {campañaReciente.meta}
                                     </p>
                                 </div>
-                                <button className="ver-mas-btn">Ver más</button>
+                                <button className="ver-mas-btn" onClick={() => navigate(`/perfil/${campañaReciente.ongId}`)}>Ver más</button>
                             </div>
+                        </div>) : (
+                        <div className="dashboard-section empty-state">
+                            <h3>Aún no participas en ninguna campaña</h3>
+                            <p>Para poder visualizar tu campaña más reciente, debes adentrarte en la comunidad</p>
+                            <button className="home-screen-principal-btn" onClick={() => navigate('/voluntariado')}>
+                                ✨ ¡Súmate a una causa ahora!
+                            </button>
                         </div>
-                    )}
+                    )
+                    }
 
                 </div>
             )}
@@ -181,10 +208,41 @@ export default function MyProfileScreen({ user }) {
             )}
 
             {activeTab === 'voluntariados' && (
-                <div className="dashboard-section empty-state">
-                    <h3>Mis Voluntariados Activos</h3>
-                    <p>No tienes voluntariados agendados por el momento o solicitudes pendientes de cancelación.</p>
-                </div>
+                misvoluntariado.length > 0 ? ( //se compara si tiene alguna info el arreglo                    
+                    <div className="dashboard-section voluntariado-box">
+                        {misvoluntariado.map((item, index) => {
+                            // no utilizo otro map xq sino se repite 2 veces una misma linea  
+                            const ongCorrespondiente = ongs.find(ong => ong.id === item.ongId);
+
+                            return (
+                                <div key={index} className="tarjeta-cv">                                    
+                                    <div className="tarjeta-cv-header">
+                                        <h3 className="tarjeta-cv-title">🏢 {item.ongName}</h3>
+                                    </div>                                    
+                                    <div className="tarjeta-cv-body">
+                                        <p className="tarjeta-cv-info">
+                                            <strong> Locación:</strong> {ongCorrespondiente.location || "No especificada"}
+                                        </p>
+                                        <p className="tarjeta-cv-info tarjeta-cv-mision">
+                                            <strong> Misión:</strong> {ongCorrespondiente.mision || "No especificada"}
+                                        </p>
+                                        <p className="tarjeta-cv-info">
+                                            <strong> Fecha de participación:</strong> {item.fechaParticipacion}
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                ) : (                    
+                    <div className="dashboard-section empty-state">
+                        <h3>Aún no cuentas con un historial de voluntariado</h3>
+                        <p>Ve a la página principal de voluntariados</p>
+                        <button className="home-screen-principal-btn" onClick={() => navigate('/voluntariado')}>
+                            ✨ ¡Postúlate!
+                        </button>
+                    </div>
+                )
             )}
 
         </div>
