@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { ongs, campañas, usuarios } from '../data.json';
+import { ongs, campañas } from '../data.json';
 import ProfilePhotoModal from '../components/ProfilePhotoModal.jsx';
 import SeguimientoScreen from '../components/SeguimientoScreen.jsx';
 
@@ -15,6 +15,7 @@ export default function MyProfileScreen({ user }) {
 
 
     let initialFoto = defaultFotoUrl;
+
     try {
         const stored = JSON.parse(localStorage.getItem('registeredUser'));
         if (stored && stored.email && user?.email && stored.email.toLowerCase() === user.email.toLowerCase() && stored.photoUrl) {
@@ -30,6 +31,7 @@ export default function MyProfileScreen({ user }) {
 
     function saveProfilePhoto(url) {
         setFotoUrl(url);
+
         try {
             const stored = JSON.parse(localStorage.getItem('registeredUser')) || null;
             if (stored && stored.email && user?.email && stored.email.toLowerCase() === user.email.toLowerCase()) {
@@ -79,6 +81,7 @@ export default function MyProfileScreen({ user }) {
             {/* BANNER DE USUARIO */}
             <div className="profile-hero">
                 <div className="profile-banner" style={{ backgroundImage: `url(${usuarioLogueado.bannerUrl})` }}></div>
+
                 <div className="profile-info-strip">
                     <div className="profile-avatar-container">
                         {fotoUrl ? (
@@ -86,14 +89,19 @@ export default function MyProfileScreen({ user }) {
                         ) : (
                             <div className="profile-avatar profile-avatar-empty" aria-label="Avatar vacío"></div>
                         )}
+
                         <button
                             className="profile-btn-edit-photo"
                             title="Cambiar foto de perfil"
-                            onClick={() => { setPhotoInput(fotoUrl || ''); setShowPhotoModal(true); }}
+                            onClick={() => {
+                                setPhotoInput(fotoUrl || '');
+                                setShowPhotoModal(true);
+                            }}
                         >
                             +
                         </button>
                     </div>
+
                     <div className="profile-text">
                         <h2>{usuarioLogueado.fullName}</h2>
                         {usuarioLogueado.biografia ? (
@@ -103,12 +111,14 @@ export default function MyProfileScreen({ user }) {
                 </div>
             </div>
 
-            {/* Modal manejado por componente reutilizable */}
             <ProfilePhotoModal
                 isOpen={showPhotoModal}
                 initialUrl={photoInput}
                 onClose={() => setShowPhotoModal(false)}
-                onSave={(url) => { saveProfilePhoto(url); setShowPhotoModal(false); }}
+                onSave={(url) => {
+                    saveProfilePhoto(url);
+                    setShowPhotoModal(false);
+                }}
             />
 
             {/* uso de useState */}
@@ -116,9 +126,11 @@ export default function MyProfileScreen({ user }) {
                 <button className={`tab-btn ${activeTab === 'actividad' ? 'active' : ''}`} onClick={() => setActiveTab('actividad')}>
                     Mi Actividad
                 </button>
+
                 <button className={`tab-btn ${activeTab === 'seguimiento' ? 'active' : ''}`} onClick={() => setActiveTab('seguimiento')}>
                     Seguimiento
                 </button>
+
                 <button className={`tab-btn ${activeTab === 'voluntariados' ? 'active' : ''}`} onClick={() => setActiveTab('voluntariados')}>
                     Mis Voluntariados
                 </button>
@@ -172,17 +184,21 @@ export default function MyProfileScreen({ user }) {
                                 <div className="campaña-image-placeholder">
                                     <img src={campañaReciente.imagen} alt="" />
                                 </div>
+
                                 <div className="campaña-stats-summary">
                                     <span className={`badge ${campañaReciente.badgeClass}`}>
                                         {campañaReciente.badge}
                                     </span>
+
                                     <p>{campañaReciente.desc}</p>
+
                                     <div className="progress-bar-container">
                                         <div
                                             className="progress-bar-fill"
                                             style={{ width: `${Math.min((campañaReciente.actual / campañaReciente.meta) * 100, 100)}%` }}
                                         ></div>
                                     </div>
+
                                     <p className="progress-text">
                                         Recaudado: <strong>S/. {campañaReciente.actual}</strong> de S/. {campañaReciente.meta}
                                     </p>
@@ -244,7 +260,6 @@ export default function MyProfileScreen({ user }) {
                     </div>
                 )
             )}
-
         </div>
     );
 }

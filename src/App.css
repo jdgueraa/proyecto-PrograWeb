@@ -2255,3 +2255,65 @@ body {
   padding-left: 30px;
   border-left: 2px solid #cfe8db;
 }
+
+.ong-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.ong-edit-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+  color: #123d2a;
+}
+
+.ong-edit-form input,
+.ong-edit-form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cfe7d8;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+}
+
+.ong-edit-form input:focus,
+.ong-edit-form textarea:focus {
+  border-color: #168354;
+}
+
+.ong-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.ong-edit-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+  color: #123d2a;
+}
+
+.ong-edit-form input,
+.ong-edit-form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cfe7d8;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+}
+
+.ong-edit-form input:focus,
+.ong-edit-form textarea:focus {
+  border-color: #168354;
+}
