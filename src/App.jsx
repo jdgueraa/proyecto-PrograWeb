@@ -150,6 +150,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
 
+
         <Route path="/"         element={<LoginScreen onLogin={handleLogin} />} />
         <Route path="/login"    element={<LoginScreen onLogin={handleLogin} />} />
         <Route path="/registro" element={<RegisterScreen />} />

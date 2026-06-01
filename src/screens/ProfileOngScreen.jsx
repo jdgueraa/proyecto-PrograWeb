@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { ongs } from '../data.json';
-import ProfilePhotoModal from '../components/ProfilePhotoModal.jsx';
+import ProfilePhotoModal from '../components/ProfilePhotoModal.jsx'; 
+
+
 
 export default function ProfileOngScreen({ user, onUpdateUser }) {
     if (!user) {
