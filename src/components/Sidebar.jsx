@@ -10,19 +10,26 @@ const ITEMS_PERSONA = [
 ];
 
 const ITEMS_ONG = [
-  { icon: "🛠️", label: "Panel ONG", path: "/admin" },
-  { icon: "👤", label: "Mi perfil",  path: "/MiPerfil" },
+  { icon: "🛠️", label: "Panel ONG",   path: "/admin" },
+  { icon: "👤", label: "Perfil ONG",  path: "/MiPerfil" },
 ];
 
 export default function Sidebar({ user, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const items = user?.role === 'ong' ? ITEMS_ONG : ITEMS_PERSONA;
+  const esOng = user?.role === 'ong';
+  const items = esOng ? ITEMS_ONG : ITEMS_PERSONA;
 
   return (
     <nav className="sidebar">
-      <div className="sidebar-logo">🌿</div>
+      <div
+        className="sidebar-logo"
+        onClick={() => navigate(esOng ? "/admin" : "/home")}
+        style={{ cursor: 'pointer' }}
+      >
+        🌿
+      </div>
 
       {items.map((item, idx) => (
         <div
@@ -40,7 +47,10 @@ export default function Sidebar({ user, onLogout }) {
         <div
           className="sidebar-item"
           title="Cerrar sesión"
-          onClick={() => { onLogout(); navigate('/login'); }}
+          onClick={() => {
+            onLogout();
+            navigate('/login');
+          }}
           style={{ cursor: 'pointer', marginTop: 'auto' }}
         >
           🚪
