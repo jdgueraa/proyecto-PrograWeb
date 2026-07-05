@@ -127,7 +127,8 @@
       "category": "Educación",
       "ongId": 2,
       "ongName": "Educa Contigo",
-      "location": "Apurímac, Perú"
+      "location": "Apurímac, Perú",
+      "imagen" : ""
     },
     {
       "id": 4,
@@ -147,7 +148,8 @@
       "category": "Salud",
       "ongId": 3,
       "ongName": "Salud Para Todos",
-      "location": "Puno, Perú"
+      "location": "Puno, Perú",
+      "imagen" : ""
     },
     {
       "id": 5,
@@ -167,7 +169,8 @@
       "category": "Agua",
       "ongId": 3,
       "ongName": "Salud Para Todos",
-      "location": "Cajamarca, Perú"
+      "location": "Cajamarca, Perú",
+      "imagen" : ""
     },
     {
       "id": 6,
@@ -187,7 +190,8 @@
       "category": "Pobreza",
       "ongId": 2,
       "ongName": "Educa Contigo",
-      "location": "Huancavelica, Perú"
+      "location": "Huancavelica, Perú",
+      "imagen" : ""
     },
     {
       "id": 7,
@@ -207,7 +211,8 @@
       "category": "Medio Ambiente",
       "ongId": 1,
       "ongName": "Tierra Verde Perú",
-      "location": "Piura, Perú"
+      "location": "Piura, Perú",
+      "imagen" : ""
     }
   ],
   "voluntariados": [
@@ -431,6 +436,7 @@
       "username": "maria_garcia",
       "role": "persona",
       "creditos": 500,
+      "ongseguidas":[],
       "donaciones": [],
       "voluntariadosPostulados": []
     },
@@ -443,6 +449,7 @@
       "role": "ong",
       "ongId": 1,
       "creditos": 0,
+      "ongseguidas":[],
       "donaciones": [],
       "voluntariadosPostulados": []
     },
