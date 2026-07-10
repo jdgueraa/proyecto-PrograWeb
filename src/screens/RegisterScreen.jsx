@@ -12,6 +12,22 @@ export default function RegisterScreen() {
   const [success, setSuccess]     = useState('');
   const [accountType, setAccountType] = useState('user');
 
+// TODO(backend): esta función todavía guarda la cuenta nueva en
+// localStorage. Para conectarla al backend real:
+//   1. Importar { api } desde '../api' (mismo ayudante que usa App.jsx).
+//   2. Reemplazar el bloque `localStorage.setItem('registeredUser', ...)`
+//      por: `await api.post('/auth/register', { fullName: nombre.trim(),
+//      email: emailValue, password, role: accountType })`.
+//   3. El backend ya se encarga de encriptar la contraseña, poner
+//      creditos=200 y (si role === 'ong') crear la fila de la ONG — no
+//      hace falta armar esos campos aquí.
+//   4. Si el registro fue exitoso, el backend responde { token, user }.
+//      Se puede guardar el token igual que en App.jsx (handleLogin) para
+//      dejar al usuario ya logueado, o simplemente navegar a /login como
+//      hace ahora para que inicie sesión con su nueva cuenta.
+//   5. Como ahora es una llamada a la red, esta función debe volverse
+//      `async function handleRegister()` y usar try/catch para mostrar
+//      el mensaje de error que devuelva el backend (ej. correo repetido).
 function handleRegister() {
   setError('');
   setSuccess('');

@@ -9,9 +9,12 @@ export default function LoginScreen({ onLogin }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  function handleLogin() {
+  // onLogin (definido en App.jsx) ahora es async porque le pregunta al
+  // backend si el correo/contraseña son correctos, así que hay que
+  // esperar (await) su respuesta antes de decidir si hubo error.
+  async function handleLogin() {
     setError('');
-    const errorMessage = onLogin(email, password);
+    const errorMessage = await onLogin(email, password);
     if (errorMessage) {
       setError(errorMessage);
       return;

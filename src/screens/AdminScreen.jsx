@@ -1,3 +1,29 @@
+// TODO(backend): este panel arma los objetos de campaña/voluntariado
+// completos a mano (con id, badge, ongName, etc.) y lee los donantes /
+// postulantes desde localStorage. Con el backend real:
+//   1. Quitar el import de `dataJson`. La ONG propia ya viene incluida
+//      en `user.ong` (gracias a GET /api/me) — cambiar
+//      `const miOng = dataJson.ongs.find(o => o.id === user?.ongId)`
+//      por `const miOng = user?.ong`.
+//   2. `handleCrearCampaña` debe mandar SOLO los campos del formulario a
+//      `onCreateCampaña` (la función de App.jsx ya hace
+//      `api.post('/campanas', datosFormulario)` y arma id/badge/donantes
+//      por su cuenta). Cambiar la llamada a algo como:
+//      `onCreateCampaña({ name: formCampaña.name.trim(), desc: ...,
+//      meta: parseInt(formCampaña.meta), category, location, fechaInicio,
+//      fechaFin, urgent: formCampaña.urgent })` — sin id, badge, ongName,
+//      actual, donantes, esos ya no se mandan, los pone el backend.
+//   3. Mismo cambio para `handleCrearVoluntariado`: mandar solo
+//      { name, desc, category, modalidad, cupos, duracion, fechaInicio,
+//      location } a `onCreateVoluntariado`.
+//   4. `donacionesLog`/`postulacionesLog` (localStorage) deben
+//      reemplazarse por llamadas al backend, UNA por campaña/voluntariado
+//      que se esté mostrando: `await api.get(`/campanas/${c.id}/donaciones`)`
+//      y `await api.get(`/voluntariados/${v.id}/postulaciones`)`. Como son
+//      llamadas async, esto probablemente conviene resolverlo con un
+//      `useEffect` que las pida cuando cambian `misCampañas`/
+//      `misVoluntariados`, guardándolas en un `useState` por separado
+//      (por ejemplo `const [donantesPorCampaña, setDonantesPorCampaña] = useState({})`).
 import React, { useState } from 'react';
 import dataJson from '../data.json';
 

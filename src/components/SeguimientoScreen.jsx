@@ -1,10 +1,16 @@
+// CONECTADO AL BACKEND: antes este componente leía `user.historialDonaciones`
+// (un campo que solo existía hardcodeado para el usuario demo "gatitos55")
+// y buscaba cada campaña en el arreglo fijo `campañas` de data.json. Ahora
+// GET /api/me devuelve `user.donaciones` con la campaña de cada donación
+// ya incluida (`donacion.campana`), así que no hace falta ningún dato fijo.
 import React from 'react';
-import { campañas } from '../data.json'; // Importamos las campañas globales para el progreso
 
 export default function SeguimientoScreen({ user }) {
 
     const historialVoluntariados = user?.historialVoluntariados || [];
-    const historialDonaciones = user?.historialDonaciones || [];
+    // CAMBIO: antes `user?.historialDonaciones`, ese campo no existe en la
+    // respuesta real del backend — se llama `donaciones`.
+    const historialDonaciones = user?.donaciones || [];
 
 
     // Suma total
@@ -86,8 +92,12 @@ export default function SeguimientoScreen({ user }) {
                     <div className="campaign-compare-list">
 
                         {historialDonaciones.map((donacion, index) => {
-                            // BUSQUEDA DINÁMICA
-                            const globalCamp = campañas.find(c => c.id === donacion.campañaId);
+                            // CAMBIO: antes se buscaba la campaña a mano en el
+                            // arreglo fijo `campañas` por `donacion.campañaId`.
+                            // Ahora el backend ya incluye la campaña completa
+                            // en `donacion.campana` (users.controller.js la trae
+                            // con imagen/meta/actual/desc), no hay que buscar nada.
+                            const globalCamp = donacion.campana;
 
                             if (!globalCamp) return null;
                             //porcentaje global de recaudación de la campaña
@@ -107,7 +117,9 @@ export default function SeguimientoScreen({ user }) {
                                             className="progress-bar-fill"
                                             style={{
                                                 width: `${porcentajeGlobal}%`,
-                                                backgroundColor: donacion.ongId === 3 ? '#3498db' : '#2ecc71'
+                                                // CAMBIO: el ongId no viene directo en la donación,
+                                                // vive dentro de su campaña (globalCamp.ongId).
+                                                backgroundColor: globalCamp.ongId === 3 ? '#3498db' : '#2ecc71'
                                             }}
                                         ></div>
                                     </div>

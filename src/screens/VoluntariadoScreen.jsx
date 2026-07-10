@@ -12,6 +12,16 @@
 //
 // DATOS (data.json):
 //   • categories     →  categorías para los botones de filtro
+//
+// TODO(backend): `voluntariados`, `user` y `onPostular` ya llegan
+// conectados al backend vía App.jsx. El import de `categories` puede
+// quedarse (lista fija). Único cambio real necesario: la función
+// `yaPostulado(vId)` más abajo compara contra `user.voluntariadosPostulados`,
+// pero GET /api/me ya no devuelve ese campo — devuelve `user.postulaciones`
+// (arreglo de filas Postulacion, cada una con `.voluntariadoId`). Cambiar
+// esa función a: `(user?.postulaciones || []).some(p => p.voluntariadoId === vId)`.
+// (El mismo cambio aplica dentro de VoluntariadoDetailModal.jsx, que hace
+// la misma comprobación).
 // ─────────────────────────────────────────────────────────────
 
 import { useState } from 'react';
