@@ -167,9 +167,15 @@ export default function App() {
         <Route path="/login"    element={<LoginScreen onLogin={handleLogin} />} />
         <Route path="/registro" element={<RegisterScreen />} />
         <Route path="/home" element={
-        authUser?.role === 'ong'
-        ? <Navigate to="/admin" replace />
-        : <AppLayout user={authUser} onLogout={handleLogout}><HomeScreen /></AppLayout>
+          !authUser 
+          ? <Navigate to="/login" replace />
+          : authUser.role === 'ong'
+          ? <Navigate to="/admin" replace />
+          : (
+        <AppLayout user={authUser} onLogout={handleLogout}>
+          <HomeScreen user={authUser} onDonate={handleDonate} />
+        </AppLayout>
+            )
         } />
         <Route path="/buscar" element={
           <AppLayout user={authUser} onLogout={handleLogout}><SearchScreen /></AppLayout>

@@ -1,19 +1,78 @@
 // src/screens/HomeScreen.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ongs, campañas } from '../data.json';
 
 import CampaignCard from '../components/CampaignCard';
-import FeaturedOng from '../components/FeaturedOng';
+import FeaturedOng from '../components/FeaturedOng'
 import CampaignDetailModal from '../components/CampaignDetailModal';
 import '../App.css';
 
-export default function HomeScreen() {
+export default function HomeScreen({ user, onDonate }) {
   const navigate = useNavigate();
+  const [campanasList, setCampanasList] = useState([]);
+  const [ongsList, setOngsList] = useState([]);
   const [selectedCampaña, setSelectedCampaña] = useState(null);
+  
+  const [loading, setLoading] = useState(true);
 
-  const ongDestacada      = ongs.find(o => o.featured === true) || ongs[0];
-  const campañasUrgentes  = campañas.filter(c => c.urgent === true);
+  useEffect(() => {
+    const cargarDatosBackend = async () => {
+      try {
+        const [resCampanas, resOngs] = await Promise.all([
+          fetch('http://localhost:3000/api/campanas'),
+          fetch('http://localhost:3000/api/ongs')
+        ]);
+
+        const campanasData = await resCampanas.json();
+        const ongsData = await resOngs.json();
+
+        // Actualizamos los estados con la data real
+        setCampanasList(campanasData);
+        setOngsList(ongsData);
+      } catch (error) {
+        console.error("Error al conectar con el backend:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarDatosBackend();
+  }, []);
+
+  if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
+  const campañasUrgentes = campanasList.filter(c => c.urgent === true);
+  const ongDestacada = ongsList.find(o => o.featured === true);
+  const totalCampanas = campanasList.length;
+  const totalOngs = ongsList.length;
+
+  const handleDonarEnHome = (id, monto) => {
+    onDonate(id, monto);
+    // Actualiza la campaña seleccionada
+    setCampanasList(prevLista =>
+      prevLista.map(c =>
+        c.id === id
+          ? { ...c, actual: c.actual + monto, donantes: (c.donantes || 0) + 1 }
+          : c
+      )
+    );
+
+    setSelectedCampaña(prev => ({
+      ...prev,
+      actual: prev.actual + monto,
+      donantes: (prev.donantes || 0) + 1
+    }));
+  };
+
+  if (loading) {
+    return (
+      <div className="fade-in home-screen-wrapper" style={{ textAlign: 'center', padding: '100px 0' }}>
+        <h2>Cargando información... ⏳</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="fade-in home-screen-wrapper">
@@ -34,7 +93,7 @@ export default function HomeScreen() {
       <div className="home-screen-stats-grid">
         <div className="home-screen-stat-card">
           <span>🏢</span>
-          <h3 className="home-screen-stat-number">{ongs.length}</h3>
+          <h3 className="home-screen-stat-number">{totalOngs}</h3>
           <p className="home-screen-stat-label">Organizaciones Aliadas</p>
         </div>
         <div className="home-screen-stat-card">
@@ -44,7 +103,7 @@ export default function HomeScreen() {
         </div>
         <div className="home-screen-stat-card">
           <span>🤝</span>
-          <h3 className="home-screen-stat-number">{campañas.length}</h3>
+          <h3 className="home-screen-stat-number">{totalCampanas}</h3>
           <p className="home-screen-stat-label">Campañas Activas</p>
         </div>
       </div>
@@ -69,14 +128,18 @@ export default function HomeScreen() {
       </div>
 
       {/* 4. SECCIÓN: ONG DESTACADA DE LA SEMANA */}
-      <FeaturedOng
-        ong={ongDestacada}
-        onNavigate={() => navigate(`/perfil/${ongDestacada?.id || 1}`)}
-      />
+      {ongDestacada && (
+        <FeaturedOng
+          ong={ongDestacada}
+          onNavigate={() => navigate(`/perfil/${ongDestacada.id}`)}
+        />
+      )}
 
       {selectedCampaña && (
         <CampaignDetailModal
           campaña={selectedCampaña}
+          user={user}
+          onDonate={handleDonarEnHome}
           onClose={() => setSelectedCampaña(null)}
         />
       )}
