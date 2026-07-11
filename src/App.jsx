@@ -174,7 +174,16 @@ export default function App() {
         } />
         <Route path="/perfil/:id" element={
           <AppLayout user={authUser} onLogout={handleLogout}>
-            <ProfileScreen user={authUser} onUpdateUser={handleUpdateUser} />
+            {/* campañas/voluntariados: para que ProfileScreen pueda mostrar
+                las de esa ONG en particular, filtrando por ongId.
+                onFollowChange: para refrescar al usuario después de
+                seguir/dejar de seguir una ONG. */}
+            <ProfileScreen
+              user={authUser}
+              campañas={campañas}
+              voluntariados={voluntariados}
+              onFollowChange={refreshUser}
+            />
           </AppLayout>
         } />
 

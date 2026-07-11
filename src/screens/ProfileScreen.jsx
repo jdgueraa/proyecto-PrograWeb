@@ -1,55 +1,80 @@
-// TODO(backend): esta pantalla importa ongs/campañas/voluntariados fijos
-// desde data.json y guarda el "seguir" dentro del propio objeto usuario.
-// Para conectarla:
-//   1. Quitar ese import de data.json. En su lugar, pedir la ONG puntual
-//      al backend: `const [ong, setOng] = useState(null)` +
-//      `useEffect(() => { api.get(`/ongs/${id}`).then(setOng); }, [id]);`
-//   2. Las campañas/voluntariados de ESTA ong ya no se filtran de un
-//      arreglo global aquí — o bien recibirlas como props desde App.jsx
-//      (igual que en DonationsScreen/VoluntariadoScreen) y filtrar por
-//      `c.ongId === ong.id` como ya hace el código de abajo, o pedirlas
-//      directo con api.get('/campanas') / api.get('/voluntariados').
-//   3. El campo `user.ongsSeguidasIds` ya NO existe — GET /api/me ahora
-//      devuelve `user.ongsSeguidas` (arreglo de objetos ONG completos,
-//      no solo ids). Cambiar `seguido` a algo como:
-//      `const seguido = (user?.ongsSeguidas || []).some(o => o.id === ong.id);`
-//   4. `toggleSeguir` ya no debe llamar a `onUpdateUser`. Debe llamar
-//      directo al endpoint dedicado:
-//      `await api.post(`/ongs/${ong.id}/follow`)` y luego refrescar el
-//      usuario (por ejemplo pidiendo a App.jsx una función `onFollowChange`
-//      que haga `await refreshUser()`, similar a como App.jsx ya expone
-//      `handleUpdateUser`).
-import React, { useState } from 'react';
+// CONECTADO AL BACKEND:
+// Esta pantalla es el perfil público de una ONG (se abre cuando haces
+// clic en "Ver Perfil" desde Buscar, o en el nombre de la ONG desde una
+// tarjeta de Donaciones/Voluntariado).
+//
+// Antes buscaba la ONG y sus campañas/voluntariados en el archivo fijo
+// data.json. Ahora:
+//   - La ONG puntual se pide al backend con su id (GET /api/ongs/:id).
+//   - Las campañas y voluntariados de esa ONG llegan como props desde
+//     App.jsx (que ya los trae del backend), y aquí solo se filtran por
+//     ongId, igual que antes.
+//   - El botón de "Seguir" ya no guarda nada dentro del usuario a mano:
+//     llama al endpoint POST /api/ongs/:id/follow, que es el que de
+//     verdad guarda el seguimiento en la base de datos.
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ongs, campañas, voluntariados } from '../data.json';
+import { api } from '../api';
 import CampaignDetailModal from '../components/CampaignDetailModal';
 import VoluntariadoDetailModal from '../components/VoluntariadoDetailModal';
 
 const MODALIDAD_ICON = { Presencial: '📍', Virtual: '💻', Híbrido: '🔄' };
 
-export default function ProfileScreen({ user, onUpdateUser }) {
+export default function ProfileScreen({ user, campañas = [], voluntariados = [], onFollowChange }) {
   const [activeTab, setActiveTab]               = useState('campañas');
   const [selectedCampaña, setSelectedCampaña]   = useState(null);
   const [selectedVol, setSelectedVol]           = useState(null);
   const navigate  = useNavigate();
   const { id }    = useParams();
 
-  const ong = ongs.find(o => o.id === parseInt(id)) || ongs[0];
+  // Aquí guardamos la ONG que nos responda el backend. Arranca en
+  // null porque todavía no hemos recibido la respuesta.
+  const [ong, setOng] = useState(null);
+
+  // Le pedimos al backend los datos de esta ONG en particular. El "id"
+  // va dentro de la lista de dependencias ([id]) para que, si el
+  // usuario navega de un perfil de ONG a otro, se vuelva a pedir.
+  useEffect(() => {
+    api.get('/ongs/' + id).then(function (respuesta) {
+      setOng(respuesta);
+    });
+  }, [id]);
+
+  // Mientras todavía no llega la respuesta del backend, mostramos un
+  // mensaje simple en vez de intentar leer datos que no existen aún.
+  if (!ong) {
+    return <div className="fade-in">Cargando perfil de la ONG...</div>;
+  }
 
   const ongCampañas      = campañas.filter(c => c.ongId === ong.id);
   const ongVoluntariados = voluntariados.filter(v => v.ongId === ong.id);
 
-  // Verifica si el usuario ya sigue esta ONG
-  const seguido = (user?.ongsSeguidasIds || []).includes(ong.id);
+  // Verifica si el usuario ya sigue esta ONG. Antes este dato vivía en
+  // "user.ongsSeguidasIds" (solo ids). Ahora GET /api/me manda
+  // "user.ongsSeguidas", con las ONGs completas que sigue el usuario.
+  const seguido = (user?.ongsSeguidas || []).some(o => o.id === ong.id);
 
-  // Alterna seguir / dejar de seguir y guarda en el usuario
-  function toggleSeguir() {
-    if (!user || !onUpdateUser) return;
-    const ids = user.ongsSeguidasIds || [];
-    const nuevasIds = seguido
-      ? ids.filter(i => i !== ong.id)          // quitar
-      : [...ids, ong.id];                       // agregar
-    onUpdateUser({ ...user, ongsSeguidasIds: nuevasIds });
+  // Avisa al backend que el usuario quiere seguir o dejar de seguir
+  // esta ONG. Es "async" porque espera la respuesta del servidor antes
+  // de actualizar la pantalla.
+  async function toggleSeguir() {
+    if (!user) return;
+
+    try {
+      // Esto guarda el cambio de verdad en la base de datos
+      await api.post('/ongs/' + ong.id + '/follow');
+
+      // Volvemos a pedir la ONG (para que el contador de seguidores
+      // se actualice) y avisamos a App.jsx que refresque al usuario
+      // (para que "seguido" quede bien la próxima vez que se calcule).
+      const ongActualizada = await api.get('/ongs/' + ong.id);
+      setOng(ongActualizada);
+      if (onFollowChange) {
+        onFollowChange();
+      }
+    } catch (error) {
+      console.log('No se pudo actualizar el seguimiento', error);
+    }
   }
 
   return (
@@ -94,7 +119,9 @@ export default function ProfileScreen({ user, onUpdateUser }) {
       {/* ── Stats ── */}
       <div className="ong-prof-stats">
         <div className="ong-prof-stat">
-          <span className="ong-prof-stat-num">{(ong.seguidores + (seguido ? 1 : 0)).toLocaleString()}</span>
+          {/* El contador de seguidores ya viene correcto desde el
+              backend (ya no hace falta sumarle +1 a mano). */}
+          <span className="ong-prof-stat-num">{ong.seguidores.toLocaleString()}</span>
           <span className="ong-prof-stat-label">Seguidores</span>
         </div>
         <div className="ong-prof-stat-divider" />

@@ -13,11 +13,12 @@
 // DATOS (data.json):
 //   • categories →  categorías para los botones de filtro
 //
-// TODO(backend): esta pantalla NO necesita casi cambios — `campañas`,
-// `user` y `onDonate` ya llegan como props desde App.jsx, que ya está
-// conectado al backend (GET /api/campanas y POST /api/donaciones). El
-// import de `categories` puede quedarse tal cual: es una lista fija que
-// nunca cambia, no necesita venir del backend.
+// CONECTADO AL BACKEND:
+// `campañas`, `user` y `onDonate` ya llegan aquí como props desde
+// App.jsx, y App.jsx ya los trae del backend (GET /api/campanas y
+// POST /api/donaciones). Por eso esta pantalla no necesitó ningún
+// cambio para funcionar con datos reales. `categories` sí se deja tal
+// cual: es una lista fija que nunca cambia, no hace falta pedirla al servidor.
 // ─────────────────────────────────────────────────────────────
 
 import { useState } from 'react';

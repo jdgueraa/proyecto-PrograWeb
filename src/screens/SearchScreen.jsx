@@ -9,21 +9,29 @@
 //   • categories →  categorías para los botones de filtro
 // ─────────────────────────────────────────────────────────────
 
-// TODO(backend): esta pantalla todavía importa `ongs` fijo desde
-// data.json (línea de abajo). Para conectarla:
-//   1. Quitar `ongs` de ese import (dejar solo `categories`, que puede
-//      seguir como constante local ya que esas categorías nunca cambian).
-//   2. Importar { api } desde '../api'.
-//   3. Agregar `const [ongs, setOngs] = useState([]);` y un
-//      `useEffect(() => { api.get('/ongs').then(setOngs); }, []);`
-//      (mismo patrón que App.jsx usa para cargar campañas/voluntariados).
-//   4. El resto de esta pantalla (el filtro por texto/categoría más abajo)
-//      NO cambia — ya funciona igual sobre cualquier arreglo `ongs`.
-import React, { useState } from 'react';
-import { ongs, categories } from '../data.json';
+// CONECTADO AL BACKEND:
+// Antes las ONGs venían fijas de data.json. Ahora se piden al backend
+// (a la API) apenas se abre esta pantalla, para que siempre se vea la
+// lista real que hay guardada en la base de datos.
+import React, { useState, useEffect } from 'react';
+import { categories } from '../data.json';
+import { api } from '../api';
 import OngCard from '../components/OngCard';
 
 export default function SearchScreen() {
+
+  // Aquí vamos a guardar la lista de ONGs que nos responda el backend.
+  // Arranca vacía porque todavía no hemos recibido la respuesta.
+  const [ongs, setOngs] = useState([]);
+
+  // useEffect con [] vacío al final = "ejecuta esto una sola vez,
+  // apenas se muestra la pantalla". Le pedimos al backend la lista
+  // de ONGs (GET /api/ongs) y la guardamos con setOngs.
+  useEffect(() => {
+    api.get('/ongs').then(function (respuesta) {
+      setOngs(respuesta);
+    });
+  }, []);
 
   // Texto que el usuario escribe en el buscador
   const [query, setQuery] = useState('');

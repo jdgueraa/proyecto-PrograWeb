@@ -15,18 +15,12 @@
 //   3. Si confirma → se registra la postulación y aparece mensaje de éxito
 //   4. Si ya estaba postulado → muestra directamente "¡Postulación enviada!"
 //
-// TODO(backend): más abajo, `yaPostulado` compara contra
-// `user?.voluntariadosPostulados`, pero GET /api/me ya no devuelve ese
-// campo — ahora se llama `user.postulaciones` (arreglo de filas
-// Postulacion, cada una con `.voluntariadoId`). Cambiar esa línea a:
-// `user?.postulaciones?.some(p => p.voluntariadoId === v.id) || false`.
-//
-// TODO(backend): igual que en CampaignDetailModal.jsx, `onPostular` (en
-// App.jsx) ahora es `async`. `handlePostularConfirm` de abajo lo llama
-// sin esperar la respuesta y muestra éxito de inmediato. Para manejar
-// bien un posible error del backend (ej. cupos agotados por otra persona
-// justo antes), conviene volverla `async function` con try/catch,
-// mostrando un estado de error si `onPostular` lanza una excepción.
+// CONECTADO AL BACKEND:
+// `yaPostulado` ahora se fija en `user.postulaciones` (antes se
+// llamaba `voluntariadosPostulados` en data.json). Y `handlePostularConfirm`
+// ahora espera (con "await") la respuesta real del backend antes de
+// mostrar el mensaje de éxito, por si el backend la rechaza (por
+// ejemplo porque alguien más se postuló justo antes y ya no hay cupos).
 // ─────────────────────────────────────────────────────────────
 
 import React, { useEffect, useState } from 'react';
@@ -51,16 +45,28 @@ export default function VoluntariadoDetailModal({ voluntariado: v, user, onPostu
   const cuposLibres = v.cupos - v.cuposOcupados;
   const pctOcupado  = Math.round((v.cuposOcupados / v.cupos) * 100);
   const lleno       = v.badge === 'Lleno' || cuposLibres <= 0;
-  const yaPostulado = user?.voluntariadosPostulados?.some(p => p.voluntariadoId === v.id) || false;
+  // Antes este dato se llamaba "voluntariadosPostulados". El backend
+  // lo manda ahora con el nombre "postulaciones".
+  const yaPostulado = user?.postulaciones?.some(p => p.voluntariadoId === v.id) || false;
 
   const fechaInicio = new Date(v.fechaInicio).toLocaleDateString('es-PE', {
     day: 'numeric', month: 'long', year: 'numeric',
   });
 
-  function handlePostularConfirm() {
+  // "async" quiere decir que esta función va a esperar una respuesta
+  // del backend antes de seguir. Usamos "await" para eso, y "try/catch"
+  // para saber si el backend dijo que sí (try) o si hubo algún problema
+  // (catch), por ejemplo que ya no quedan cupos.
+  async function handlePostularConfirm() {
     if (!user) { setPostulacionStatus('noauth'); return; }
-    onPostular(v.id);
-    setPostulacionStatus('success');
+
+    try {
+      await onPostular(v.id);
+      setPostulacionStatus('success');
+    } catch (error) {
+      setPostulacionStatus('error');
+    }
+
     setConfirmando(false);
   }
 
@@ -85,6 +91,15 @@ export default function VoluntariadoDetailModal({ voluntariado: v, user, onPostu
       return (
         <div className="postular-noauth-alert">
           Debes <button onClick={() => { onClose(); navigate('/login'); }}>iniciar sesión</button> para postularte.
+        </div>
+      );
+    }
+    // Mensaje que aparece si el backend no pudo registrar la postulación
+    // (por ejemplo, alguien más ocupó el último cupo justo antes).
+    if (postulacionStatus === 'error') {
+      return (
+        <div className="postular-noauth-alert">
+          No se pudo registrar tu postulación. Puede que ya no haya cupos disponibles. Intenta de nuevo.
         </div>
       );
     }
