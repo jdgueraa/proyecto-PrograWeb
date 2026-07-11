@@ -31,6 +31,24 @@ export default function HomeScreen({ user, onDonate }) {
   const [ongsList, setOngsList] = useState([]);
   const [campanasList, setCampanasList] = useState([]);
 
+  async function handleLocalDonate(campañaId, amount) {
+    await onDonate(campañaId, amount);
+
+    setCampanasList(prevList => 
+      prevList.map(c => {
+        if (c.id === campañaId) {
+          const nuevoMonto = c.actual + amount;
+          const nuevoObjeto = { ...c, actual: nuevoMonto };
+          if (selectedCampaña?.id === campañaId) {
+            setSelectedCampaña(nuevoObjeto);
+          }
+          return nuevoObjeto;
+        }
+        return c;
+      })
+    );
+  }
+
   useEffect(() => {
     api.get('/campanas')
       .then(setCampanasList)
@@ -108,7 +126,7 @@ export default function HomeScreen({ user, onDonate }) {
         <CampaignDetailModal
           campaña={selectedCampaña}
           user={user}
-          onDonate={onDonate}
+          onDonate={handleLocalDonate}
           onClose={() => setSelectedCampaña(null)}
         />
       )}

@@ -2,7 +2,7 @@
 import React from 'react';
 
 function FeaturedOng({ ong, onNavigate }) {
-  
+  if (!ong) return null;
   const categoriaReal = ong.tags && ong.tags.length > 0 ? ong.tags[0] : "General";
 
   return (
