@@ -14,6 +14,17 @@
 //   2. Aparece selector de monto (S/. 10, 25, 50, 100 o personalizado)
 //   3. Si tiene suficientes créditos → se confirma y se muestra mensaje de éxito
 //   4. Si no tiene créditos → se muestra error
+//
+// TODO(backend): `onDonate` (en App.jsx) ahora es `async` porque le pide
+// al backend que registre la donación de verdad. Más abajo,
+// `handleConfirmarDonacion` llama a `onDonate(...)` y de inmediato pone
+// `setDonationStatus('success')`, sin esperar la respuesta — funciona
+// para la demo, pero si el backend llegara a rechazar la donación (por
+// ejemplo por una condición de carrera en los créditos), igual se
+// mostraría "éxito". Para que sea correcto: hacer
+// `async function handleConfirmarDonacion()` y usar
+// `try { await onDonate(campaña.id, montoFinal); setDonationStatus('success'); }
+// catch (err) { setDonationStatus('error'); }`.
 // ─────────────────────────────────────────────────────────────
 
 import React, { useEffect, useState } from 'react';

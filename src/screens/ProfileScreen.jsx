@@ -1,3 +1,24 @@
+// TODO(backend): esta pantalla importa ongs/campañas/voluntariados fijos
+// desde data.json y guarda el "seguir" dentro del propio objeto usuario.
+// Para conectarla:
+//   1. Quitar ese import de data.json. En su lugar, pedir la ONG puntual
+//      al backend: `const [ong, setOng] = useState(null)` +
+//      `useEffect(() => { api.get(`/ongs/${id}`).then(setOng); }, [id]);`
+//   2. Las campañas/voluntariados de ESTA ong ya no se filtran de un
+//      arreglo global aquí — o bien recibirlas como props desde App.jsx
+//      (igual que en DonationsScreen/VoluntariadoScreen) y filtrar por
+//      `c.ongId === ong.id` como ya hace el código de abajo, o pedirlas
+//      directo con api.get('/campanas') / api.get('/voluntariados').
+//   3. El campo `user.ongsSeguidasIds` ya NO existe — GET /api/me ahora
+//      devuelve `user.ongsSeguidas` (arreglo de objetos ONG completos,
+//      no solo ids). Cambiar `seguido` a algo como:
+//      `const seguido = (user?.ongsSeguidas || []).some(o => o.id === ong.id);`
+//   4. `toggleSeguir` ya no debe llamar a `onUpdateUser`. Debe llamar
+//      directo al endpoint dedicado:
+//      `await api.post(`/ongs/${ong.id}/follow`)` y luego refrescar el
+//      usuario (por ejemplo pidiendo a App.jsx una función `onFollowChange`
+//      que haga `await refreshUser()`, similar a como App.jsx ya expone
+//      `handleUpdateUser`).
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ongs, campañas, voluntariados } from '../data.json';

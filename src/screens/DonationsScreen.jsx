@@ -12,6 +12,12 @@
 //
 // DATOS (data.json):
 //   • categories →  categorías para los botones de filtro
+//
+// TODO(backend): esta pantalla NO necesita casi cambios — `campañas`,
+// `user` y `onDonate` ya llegan como props desde App.jsx, que ya está
+// conectado al backend (GET /api/campanas y POST /api/donaciones). El
+// import de `categories` puede quedarse tal cual: es una lista fija que
+// nunca cambia, no necesita venir del backend.
 // ─────────────────────────────────────────────────────────────
 
 import { useState } from 'react';

@@ -14,6 +14,19 @@
 //   2. Aparece confirmación "¿Confirmar tu postulación?"
 //   3. Si confirma → se registra la postulación y aparece mensaje de éxito
 //   4. Si ya estaba postulado → muestra directamente "¡Postulación enviada!"
+//
+// TODO(backend): más abajo, `yaPostulado` compara contra
+// `user?.voluntariadosPostulados`, pero GET /api/me ya no devuelve ese
+// campo — ahora se llama `user.postulaciones` (arreglo de filas
+// Postulacion, cada una con `.voluntariadoId`). Cambiar esa línea a:
+// `user?.postulaciones?.some(p => p.voluntariadoId === v.id) || false`.
+//
+// TODO(backend): igual que en CampaignDetailModal.jsx, `onPostular` (en
+// App.jsx) ahora es `async`. `handlePostularConfirm` de abajo lo llama
+// sin esperar la respuesta y muestra éxito de inmediato. Para manejar
+// bien un posible error del backend (ej. cupos agotados por otra persona
+// justo antes), conviene volverla `async function` con try/catch,
+// mostrando un estado de error si `onPostular` lanza una excepción.
 // ─────────────────────────────────────────────────────────────
 
 import React, { useEffect, useState } from 'react';

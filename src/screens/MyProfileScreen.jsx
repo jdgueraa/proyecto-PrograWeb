@@ -1,79 +1,64 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { ongs, campañas, usuarios } from '../data.json';
 import ProfilePhotoModal from '../components/ProfilePhotoModal.jsx';
 import SeguimientoScreen from '../components/SeguimientoScreen.jsx';
 
-export default function MyProfileScreen({ user }) {
+// user y onUpdateUser vienen de App.jsx:
+//   • user           → el usuario logueado, ya resuelto por GET /api/me
+//                       (incluye ongsSeguidas, donaciones e historialVoluntariados
+//                       de verdad, para CUALQUIER usuario, no solo el de demo).
+//   • onUpdateUser    → función que guarda cambios propios con PUT /api/me
+//                       (la usamos para la foto de perfil).
+export default function MyProfileScreen({ user, onUpdateUser }) {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('actividad');
 
-    // Estado para la foto y el modal 
-    const defaultFotoUrl = user?.email?.toLowerCase() === 'amante.de.gatitos55@example.com'
-        ? "https://img.buzzfeed.com/buzzfeed-static/static/2025-03/13/18/subbuzz/UjLcjUoUE0.jpg?downsize=700%3A%2A&output-quality=auto&output-format=auto"
-        : "https://thumbs.dreamstime.com/b/vector-de-perfil-avatar-predeterminado-foto-usuario-medios-sociales-icono-183042379.jpg";
-
-
-    let initialFoto = defaultFotoUrl;
-
-    try {
-        const stored = JSON.parse(localStorage.getItem('registeredUser'));
-        if (stored && stored.email && user?.email && stored.email.toLowerCase() === user.email.toLowerCase() && stored.photoUrl) {
-            initialFoto = stored.photoUrl;
-        }
-    } catch (e) {
-
-    }
-
-    const [fotoUrl, setFotoUrl] = useState(initialFoto);
+    // La foto ahora vive en la base de datos (user.photoUrl), no en
+    // localStorage — si el usuario nunca subió una, arranca vacía.
+    const [fotoUrl, setFotoUrl] = useState(user?.photoUrl || '');
     const [showPhotoModal, setShowPhotoModal] = useState(false);
     const [photoInput, setPhotoInput] = useState('');
 
+    // Guarda la foto nueva: la mostramos de inmediato (setFotoUrl) y
+    // además le pedimos al backend que la guarde de verdad con PUT /api/me.
     function saveProfilePhoto(url) {
         setFotoUrl(url);
-
-        try {
-            const stored = JSON.parse(localStorage.getItem('registeredUser')) || null;
-            if (stored && stored.email && user?.email && stored.email.toLowerCase() === user.email.toLowerCase()) {
-                stored.photoUrl = url;
-                localStorage.setItem('registeredUser', JSON.stringify(stored));
-            }
-        } catch (e) {
-
-        }
+        onUpdateUser({ photoUrl: url });
     }
 
     if (!user) {
         return <Navigate to="/login" replace />;
     }
 
-    // Datos de gatito55
-    let gatito = null;
-    const isDefaultProfile = user.email?.toLowerCase() === 'amante.de.gatitos55@example.com';
-    if (isDefaultProfile) {
-        gatito = usuarios.find(u => u.id === 3);
-    }
-
+    // Datos básicos del usuario logueado, ya reales (antes esto era un
+    // objeto armado a mano solo para el usuario demo "gatitos55").
     const usuarioLogueado = {
         fullName: user.fullName || user.username || (user.email || '').split('@')[0],
-        username: user.username || (user.email || '').split('@')[0],
-        biografia: isDefaultProfile ? "Lo que disfruto es poder ayudar a la gente" : '',
-        fotoUrl: isDefaultProfile ? defaultFotoUrl : '',
-        bannerUrl: "https://www.revista-ballesol.com/wp-content/uploads/2024/02/ONG-840x559.jpg", // Imagen de fondo para el banner
-        ongsSeguidasIds: isDefaultProfile ? gatito.ongseguidas : [],
-        historialvolun: isDefaultProfile ? gatito.historialVoluntariados : [],
+        biografia: user.biografia || '',
+        bannerUrl: "https://www.revista-ballesol.com/wp-content/uploads/2024/02/ONG-840x559.jpg",
     };
 
+    // ONGs que el usuario sigue. GET /api/me ya devuelve esta lista
+    // filtrada desde el backend (tabla OngSeguidores) — no hay que
+    // buscar ni filtrar nada aquí.
+    const misOngsAyudadas = user.ongsSeguidas || [];
 
-    // Filtracion de las ONGs
-    const misOngsAyudadas = ongs.filter(ong => usuarioLogueado.ongsSeguidasIds.includes(ong.id));
+    // Campaña más reciente: la campaña de la última donación que hizo
+    // el usuario (ordenamos sus donaciones por fecha, la más nueva primero).
+    const donacionesOrdenadas = [...(user.donaciones || [])].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    const campañaReciente = donacionesOrdenadas[0]?.campana || null;
+    // ¿Ya alcanzó la meta? Lo calculamos aquí mismo porque el backend
+    // no guarda un campo "badge" fijo — se recalcula siempre a partir
+    // de actual vs meta (así nunca queda desactualizado).
+    const campañaRecienteLograda = campañaReciente
+        ? campañaReciente.actual >= campañaReciente.meta
+        : false;
 
-    // Campaña reciente de user    
-    const campañaReciente = isDefaultProfile ? campañas[0] : null;
-
-    const misvoluntariado = usuarioLogueado.historialvolun;
-
-
+    // Historial de voluntariado (horas ya cumplidas). Cada item ya
+    // incluye su ONG completa (item.ong: name, location, mision).
+    const misvoluntariado = user.historialVoluntariados || [];
 
     return (
         <div className="profile-dashboard">
@@ -141,7 +126,7 @@ export default function MyProfileScreen({ user }) {
                 <div className="dashboard-grid">
                     {/* BLOQUE IZQUIERDO: ONGs Ayudadas*/}
                     <div className="dashboard-section ongs-ayudadas-box">
-                        {campañaReciente ? (
+                        {misOngsAyudadas.length > 0 ? (
                             <div>
                                 <h3>ONG ayudadas:</h3>
                                 <div className="ongs-list">
@@ -189,8 +174,8 @@ export default function MyProfileScreen({ user }) {
                                 </div>
 
                                 <div className="campaña-stats-summary">
-                                    <span className={`badge ${campañaReciente.badgeClass}`}>
-                                        {campañaReciente.badge}
+                                    <span className={`badge ${campañaRecienteLograda ? 'badge-success' : 'badge-active'}`}>
+                                        {campañaRecienteLograda ? '¡Lograda!' : 'Activa'}
                                     </span>
 
                                     <p>{campañaReciente.desc}</p>
@@ -227,33 +212,28 @@ export default function MyProfileScreen({ user }) {
             )}
 
             {activeTab === 'voluntariados' && (
-                misvoluntariado.length > 0 ? ( //se compara si tiene alguna info el arreglo                    
+                misvoluntariado.length > 0 ? (
                     <div className="dashboard-section voluntariado-box">
-                        {misvoluntariado.map((item, index) => {
-                            // no utilizo otro map xq sino se repite 2 veces una misma linea  
-                            const ongCorrespondiente = ongs.find(ong => ong.id === item.ongId);
-
-                            return (
-                                <div key={index} className="tarjeta-cv">                                    
-                                    <div className="tarjeta-cv-header">
-                                        <h3 className="tarjeta-cv-title">🏢 {item.ongName}</h3>
-                                    </div>                                    
-                                    <div className="tarjeta-cv-body">
-                                        <p className="tarjeta-cv-info">
-                                            <strong> Locación:</strong> {ongCorrespondiente.location || "No especificada"}
-                                        </p>
-                                        <p className="tarjeta-cv-info tarjeta-cv-mision">
-                                            <strong> Misión:</strong> {ongCorrespondiente.mision || "No especificada"}
-                                        </p>
-                                        <p className="tarjeta-cv-info">
-                                            <strong> Fecha de participación:</strong> {item.fechaParticipacion}
-                                        </p>
-                                    </div>
+                        {misvoluntariado.map((item) => (
+                            <div key={item.id} className="tarjeta-cv">
+                                <div className="tarjeta-cv-header">
+                                    <h3 className="tarjeta-cv-title">🏢 {item.ong?.name}</h3>
                                 </div>
-                            );
-                        })}
+                                <div className="tarjeta-cv-body">
+                                    <p className="tarjeta-cv-info">
+                                        <strong> Locación:</strong> {item.ong?.location || "No especificada"}
+                                    </p>
+                                    <p className="tarjeta-cv-info tarjeta-cv-mision">
+                                        <strong> Misión:</strong> {item.ong?.mision || "No especificada"}
+                                    </p>
+                                    <p className="tarjeta-cv-info">
+                                        <strong> Fecha de participación:</strong> {item.fechaParticipacion}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                ) : (                    
+                ) : (
                     <div className="dashboard-section empty-state">
                         <h3>Aún no cuentas con un historial de voluntariado</h3>
                         <p>Ve a la página principal de voluntariados</p>

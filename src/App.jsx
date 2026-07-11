@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -14,7 +14,10 @@ import DonationsScreen from './screens/DonationsScreen';
 import VoluntariadoScreen from './screens/VoluntariadoScreen';
 import ProfileOngScreen from './screens/ProfileOngScreen.jsx';
 
-import dataJson from './data.json';
+// ANTES: import dataJson from './data.json';
+// AHORA: ya no leemos datos fijos de un archivo. Usamos api.js, que
+// centraliza las llamadas al backend (ver src/api.js).
+import { api } from './api';
 
 function AppLayout({ children, user, onLogout }) {
   return (
@@ -30,133 +33,128 @@ function AppLayout({ children, user, onLogout }) {
 export default function App() {
   const [authUser, setAuthUser] = useState(null);
 
-  const [campañas, setCampañas] = useState(() => {
-    const saved = localStorage.getItem('campañas_state');
-    return saved ? JSON.parse(saved) : dataJson.campañas;
-  });
+  // Mientras intentamos restaurar la sesión (useEffect de abajo), no
+  // queremos que las rutas protegidas redirijan a /login antes de tiempo
+  // solo porque authUser todavía es null momentáneamente.
+  const [cargandoSesion, setCargandoSesion] = useState(true);
 
-  const [voluntariados, setVoluntariados] = useState(() => {
-    const saved = localStorage.getItem('voluntariados_state');
-    return saved ? JSON.parse(saved) : dataJson.voluntariados;
-  });
+  // ANTES: useState(() => dataJson.campañas) — arrancaban con el arreglo
+  // fijo del archivo (o lo guardado en localStorage).
+  // AHORA: arrancan vacíos y se llenan pidiéndoselos al backend (ver
+  // el primer useEffect de abajo).
+  const [campañas, setCampañas] = useState([]);
+  const [voluntariados, setVoluntariados] = useState([]);
 
-  function handleLogin(email, password) {
+  // ── Cargar campañas y voluntariados desde el backend ──
+  // El arreglo [] al final significa "ejecuta esto una sola vez, apenas
+  // se abre la app" (no en cada re-render).
+  useEffect(() => {
+    api.get('/campanas').then(setCampañas).catch(() => setCampañas([]));
+    api.get('/voluntariados').then(setVoluntariados).catch(() => setVoluntariados([]));
+  }, []);
+
+  // ── Restaurar sesión al recargar la página ──
+  // Si ya había un token guardado de una sesión anterior, le preguntamos
+  // al backend "¿de quién es este token?" (GET /api/me) en vez de asumir
+  // que no hay nadie logueado.
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setCargandoSesion(false);
+      return;
+    }
+    api.get('/me')
+      .then(setAuthUser)
+      .catch(() => localStorage.removeItem('token')) // token vencido o inválido
+      .finally(() => setCargandoSesion(false));
+  }, []);
+
+  // ANTES: buscaba el correo/contraseña dentro de dataJson.usuarios.
+  // AHORA: se los manda al backend, que los revisa contra la base de
+  // datos real y devuelve un token + los datos del usuario.
+  async function handleLogin(email, password) {
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail || !password) return 'Ingresa correo y contraseña.';
 
-    const jsonUser = dataJson.usuarios.find(
-      u => u.email === trimmedEmail && u.password === password
-    );
-    if (jsonUser) {
-      const savedUpdates = JSON.parse(localStorage.getItem(`user_${jsonUser.id}`) || 'null');
-      setAuthUser(savedUpdates || { ...jsonUser });
+    try {
+      const { token, user } = await api.post('/auth/login', { email: trimmedEmail, password });
+      localStorage.setItem('token', token); // el "pase" para las siguientes peticiones
+      setAuthUser(user);
       return '';
+    } catch (err) {
+      return err.message; // ej: "Usuario o contraseña incorrectos."
     }
-
-    const storedUser = JSON.parse(localStorage.getItem('registeredUser') || 'null');
-    if (storedUser && trimmedEmail === storedUser.email && password === storedUser.password) {
-      setAuthUser(storedUser);
-      return '';
-    }
-
-    return 'Usuario o contraseña incorrectos.';
   }
 
   function handleLogout() {
+    localStorage.removeItem('token');
     setAuthUser(null);
   }
 
-  function handleUpdateUser(updatedUser) {
-    setAuthUser(updatedUser);
-    if (updatedUser.id) {
-      localStorage.setItem(`user_${updatedUser.id}`, JSON.stringify(updatedUser));
-    } else {
-      localStorage.setItem('registeredUser', JSON.stringify(updatedUser));
-    }
+  // ANTES: guardaba el usuario actualizado directo en localStorage.
+  // AHORA: le pide al backend que guarde los cambios (PUT /api/me) y
+  // actualiza el estado con lo que el backend confirma que quedó guardado.
+  // Las pantallas que llaman a esta función (MyProfileScreen,
+  // ProfileOngScreen) pueden seguir mandando el objeto que ya arman hoy;
+  // el backend solo toma los campos que reconoce (fullName, username,
+  // photoUrl, biografia) e ignora el resto.
+  async function handleUpdateUser(camposActualizados) {
+    const user = await api.put('/me', camposActualizados);
+    setAuthUser(user);
+    return user;
   }
 
-  // Se ejecuta cuando el usuario confirma una donación.
-  // Recibe el id de la campaña y el monto donado.
-  function handleDonate(campañaId, amount) {
+  // Vuelve a pedir el perfil completo al backend. Útil después de una
+  // acción que el backend maneja por su cuenta (por ejemplo seguir una
+  // ONG), para refrescar authUser con los datos más recientes.
+  async function refreshUser() {
+    const user = await api.get('/me');
+    setAuthUser(user);
+  }
 
-    // PASO 1: Actualizar la campaña donada
-    // Recorremos todas las campañas y, solo a la que coincide con campañaId,
-    // le sumamos el monto al recaudado y le agregamos 1 donante.
-    const campañasActualizadas = campañas.map(c => {
-      if (c.id === campañaId) {
-        return { ...c, actual: c.actual + amount, donantes: c.donantes + 1 };
-      }
-      return c;
+  // ANTES: esta función hacía tres cosas "a mano" en el navegador: sumaba
+  // el monto a la campaña, restaba los créditos al usuario, y guardaba un
+  // log en localStorage para que el admin viera quién donó.
+  // AHORA: todo eso lo hace el backend en una sola operación seguem
+  // (POST /api/donaciones), y nos devuelve la campaña y el usuario ya
+  // actualizados — no hay que calcular nada aquí.
+  async function handleDonate(campañaId, amount) {
+    const { user, campana } = await api.post('/donaciones', {
+      campanaId: campañaId,
+      monto: amount,
     });
-    setCampañas(campañasActualizadas);
-    localStorage.setItem('campañas_state', JSON.stringify(campañasActualizadas));
-
-    // PASO 2: Descontar créditos al usuario
-    // Creamos una copia del usuario con los créditos reducidos
-    // y la donación agregada a su historial personal.
-    const usuarioActualizado = {
-      ...authUser,
-      creditos: authUser.creditos - amount,
-      donaciones: [
-        ...authUser.donaciones,
-        { campañaId, amount, fecha: new Date().toISOString() },
-      ],
-    };
-    handleUpdateUser(usuarioActualizado);
-
-    // PASO 3: Guardar registro en el log global
-    // Esto permite que el admin de la ONG vea quién donó y cuánto.
-    const logDonaciones = JSON.parse(localStorage.getItem('donacionesLog') || '[]');
-    logDonaciones.push({
-      userId:   authUser.id || authUser.email,
-      userName: authUser.fullName,
-      campañaId,
-      amount,
-      fecha: new Date().toISOString(),
-    });
-    localStorage.setItem('donacionesLog', JSON.stringify(logDonaciones));
+    setAuthUser(user);
+    setCampañas(prev => prev.map(c => (c.id === campana.id ? campana : c)));
   }
 
-  function handlePostular(voluntariadoId) {
-    const updatedVols = voluntariados.map(v =>
-      v.id === voluntariadoId
-        ? { ...v, cuposOcupados: v.cuposOcupados + 1 }
-        : v
-    );
-    setVoluntariados(updatedVols);
-    localStorage.setItem('voluntariados_state', JSON.stringify(updatedVols));
-
-    const updatedUser = {
-      ...authUser,
-      voluntariadosPostulados: [
-        ...(authUser.voluntariadosPostulados || []),
-        { voluntariadoId, fecha: new Date().toISOString() },
-      ],
-    };
-    handleUpdateUser(updatedUser);
-
-    const log = JSON.parse(localStorage.getItem('postulaciones') || '[]');
-    log.push({
-      userId: authUser.id || authUser.email,
-      userName: authUser.fullName,
-      userEmail: authUser.email,
-      voluntariadoId,
-      fecha: new Date().toISOString(),
-    });
-    localStorage.setItem('postulaciones', JSON.stringify(log));
+  // ANTES: sumaba 1 cupo ocupado "a mano" sin validar nada.
+  // AHORA: el backend valida que haya cupos y que no estés ya postulado
+  // (POST /api/postulaciones) antes de aceptar la postulación.
+  async function handlePostular(voluntariadoId) {
+    const { voluntariado } = await api.post('/postulaciones', { voluntariadoId });
+    setVoluntariados(prev => prev.map(v => (v.id === voluntariado.id ? voluntariado : v)));
+    await refreshUser(); // para que el listado de postulaciones del usuario quede al día
   }
 
-  function handleCreateCampaña(nuevaCampaña) {
-    const updated = [...campañas, nuevaCampaña];
-    setCampañas(updated);
-    localStorage.setItem('campañas_state', JSON.stringify(updated));
+  // ANTES: AdminScreen armaba el objeto de campaña completo (id, badge,
+  // donantes, etc.) y App.jsx solo lo metía en el arreglo.
+  // AHORA: solo mandamos los datos del formulario (POST /api/campanas) y
+  // el backend arma el resto (id real de la base de datos, badge según
+  // el avance, etc.). AdminScreen.jsx debe actualizarse para mandar solo
+  // los campos del formulario, no el objeto completo (ver comentario allá).
+  async function handleCreateCampaña(datosFormulario) {
+    const nuevaCampaña = await api.post('/campanas', datosFormulario);
+    setCampañas(prev => [...prev, nuevaCampaña]);
   }
 
-  function handleCreateVoluntariado(nuevoVol) {
-    const updated = [...voluntariados, nuevoVol];
-    setVoluntariados(updated);
-    localStorage.setItem('voluntariados_state', JSON.stringify(updated));
+  async function handleCreateVoluntariado(datosFormulario) {
+    const nuevoVol = await api.post('/voluntariados', datosFormulario);
+    setVoluntariados(prev => [...prev, nuevoVol]);
   }
+
+  // Evita parpadear a /login antes de terminar de comprobar si había una
+  // sesión guardada.
+  if (cargandoSesion) return null;
 
   return (
     <BrowserRouter>
@@ -190,7 +188,9 @@ export default function App() {
           ? <AppLayout user={authUser} onLogout={handleLogout}>
               {authUser?.role === 'ong'
                 ? <ProfileOngScreen user={authUser} onUpdateUser={handleUpdateUser} />
-                : <MyProfileScreen user={authUser} voluntariados={voluntariados} />}
+                // onUpdateUser: se la pasamos para que MyProfileScreen pueda
+                // guardar la foto de perfil con PUT /api/me (antes no la recibía).
+                : <MyProfileScreen user={authUser} onUpdateUser={handleUpdateUser} />}
             </AppLayout>
           : <Navigate to="/login" replace />
         } />

@@ -1,3 +1,25 @@
+// TODO(backend): esta pantalla busca la ONG en data.json y guarda los
+// cambios metidos dentro de `user.ongProfile` (un campo que solo existe
+// en memoria). Para conectarla:
+//   1. Quitar el import de `ongs` desde data.json. GET /api/me YA incluye
+//      la ONG completa del usuario logueado en `user.ong` (ver
+//      users.controller.js del backend) — usar `ongBase = user?.ong`
+//      directo, sin buscar en ningún arreglo.
+//   2. El campo `user.ongProfile` no existe en el backend: los datos
+//      reales de la ONG viven en la tabla Ongs, no en el usuario. Cambiar
+//      `getDatosActuales()` para leer directo de `user?.ong` (sin el
+//      `.ongProfile`).
+//   3. `guardarPerfil()` ya no debe llamar a `onUpdateUser` con un
+//      `ongProfile` inventado. Debe llamar:
+//      `await api.put(`/ongs/${user.ong.id}`, ongForm)` (los campos que
+//      acepta el backend son: name, location, desc, mision, emoji, color,
+//      email, telefono, web — deben coincidir con los names de los inputs
+//      de abajo). Después de guardar, refrescar el usuario (por ejemplo
+//      con una prop `onProfileSaved` que App.jsx resuelva llamando a su
+//      `refreshUser()`).
+//   4. `guardarFoto()` sí puede seguir usando `onUpdateUser({ photoUrl: url })`
+//      tal cual, porque la foto del usuario (no de la ONG) sí vive en la
+//      tabla Users y ya la maneja PUT /api/me.
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { ongs } from '../data.json';

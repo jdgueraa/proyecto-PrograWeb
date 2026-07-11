@@ -1,4 +1,19 @@
 // src/screens/HomeScreen.jsx
+//
+// TODO(backend): esta pantalla importa `ongs, campañas` fijos desde
+// data.json (usados abajo en `ongDestacada` y `campañasUrgentes`). Como
+// App.jsx no le pasa `campañas`/`ongs` como props a esta pantalla
+// (mirar la <Route path="/home" ...> en App.jsx), hay dos formas de
+// conectarla:
+//   a) Más simple: que App.jsx le pase `campañas` como prop (ya la tiene
+//      cargada) y aquí agregar `const [ongs, setOngs] = useState([]);`
+//      con un `useEffect(() => { api.get('/ongs').then(setOngs); }, []);`
+//      para la ONG destacada.
+//   b) O bien, esta pantalla misma pide ambas cosas con `api.get('/campanas')`
+//      y `api.get('/ongs')` en su propio useEffect, sin depender de App.jsx.
+// El resto de la lógica (`.find(o => o.featured === true)`,
+// `.filter(c => c.urgent === true)`) no cambia, ya funciona igual sobre
+// cualquier arreglo real que venga del backend.
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 

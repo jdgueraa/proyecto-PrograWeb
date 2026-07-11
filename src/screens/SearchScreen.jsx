@@ -9,6 +9,16 @@
 //   • categories →  categorías para los botones de filtro
 // ─────────────────────────────────────────────────────────────
 
+// TODO(backend): esta pantalla todavía importa `ongs` fijo desde
+// data.json (línea de abajo). Para conectarla:
+//   1. Quitar `ongs` de ese import (dejar solo `categories`, que puede
+//      seguir como constante local ya que esas categorías nunca cambian).
+//   2. Importar { api } desde '../api'.
+//   3. Agregar `const [ongs, setOngs] = useState([]);` y un
+//      `useEffect(() => { api.get('/ongs').then(setOngs); }, []);`
+//      (mismo patrón que App.jsx usa para cargar campañas/voluntariados).
+//   4. El resto de esta pantalla (el filtro por texto/categoría más abajo)
+//      NO cambia — ya funciona igual sobre cualquier arreglo `ongs`.
 import React, { useState } from 'react';
 import { ongs, categories } from '../data.json';
 import OngCard from '../components/OngCard';
