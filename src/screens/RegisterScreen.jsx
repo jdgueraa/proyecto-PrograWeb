@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../api';
 
 export default function RegisterScreen() {
   const navigate = useNavigate();
@@ -10,71 +11,52 @@ export default function RegisterScreen() {
   const [password, setPassword]   = useState('');
   const [error, setError]         = useState('');
   const [success, setSuccess]     = useState('');
-  const [accountType, setAccountType] = useState('user');
+  const [accountType, setAccountType] = useState('persona');
 
-// TODO(backend): esta función todavía guarda la cuenta nueva en
-// localStorage. Para conectarla al backend real:
-//   1. Importar { api } desde '../api' (mismo ayudante que usa App.jsx).
-//   2. Reemplazar el bloque `localStorage.setItem('registeredUser', ...)`
-//      por: `await api.post('/auth/register', { fullName: nombre.trim(),
-//      email: emailValue, password, role: accountType })`.
-//   3. El backend ya se encarga de encriptar la contraseña, poner
-//      creditos=200 y (si role === 'ong') crear la fila de la ONG — no
-//      hace falta armar esos campos aquí.
-//   4. Si el registro fue exitoso, el backend responde { token, user }.
-//      Se puede guardar el token igual que en App.jsx (handleLogin) para
-//      dejar al usuario ya logueado, o simplemente navegar a /login como
-//      hace ahora para que inicie sesión con su nueva cuenta.
-//   5. Como ahora es una llamada a la red, esta función debe volverse
-//      `async function handleRegister()` y usar try/catch para mostrar
-//      el mensaje de error que devuelva el backend (ej. correo repetido).
-function handleRegister() {
-  setError('');
-  setSuccess('');
-  if (!nombre.trim() || !email.trim() || !password) {
-    setError('Completa todos los campos.');
-    return;
+  async function handleRegister() {
+    setError('');
+    setSuccess('');
+    if (!nombre.trim() || !email.trim() || !password) {
+      setError('Completa todos los campos.');
+      return;
+    }
+
+    const emailValue = email.trim().toLowerCase();
+
+    if (!emailValue.includes('@') || !emailValue.includes('.')) {
+      setError('Correo inválido.');
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      setError('La contraseña debe contener al menos una letra mayúscula.');
+      return;
+    }
+
+    try {
+      await api.post('/auth/register', {
+        fullName: nombre.trim(),
+        email: emailValue,
+        password,
+        role: accountType,
+      });
+
+      setSuccess(
+        accountType === 'ong'
+          ? 'Cuenta ONG creada correctamente. Inicia sesión para continuar.'
+          : 'Cuenta creada correctamente. Inicia sesión para continuar.'
+      );
+
+      setTimeout(() => navigate('/login'), 1200);
+    } catch (err) {
+      setError(err.message || 'Ocurrió un error al registrar.');
+    }
   }
-
-  const emailValue = email.trim().toLowerCase();
-
-  if (!emailValue.includes('@') || !emailValue.includes('.')) {
-    setError('Correo inválido.');
-    return;
-  }
-
-  // Validación de contraseña: mínimo 8 caracteres y al menos una mayúscula
-  if (password.length < 8) {
-    setError('La contraseña debe tener al menos 8 caracteres.');
-    return;
-  }
-
-  if (!/[A-Z]/.test(password)) {
-    setError('La contraseña debe contener al menos una letra mayúscula.');
-    return;
-  }
-
-  const userData = {
-    fullName: nombre.trim(),
-    email: emailValue,
-    password,
-    role: accountType,
-    creditos: 200,
-    donaciones: [],
-    voluntariadosPostulados: [],
-  };
-
-  localStorage.setItem('registeredUser', JSON.stringify(userData));
-
-  setSuccess(
-    accountType === 'ong'
-      ? 'Cuenta ONG creada correctamente.'
-      : 'Cuenta creada correctamente.'
-  );
-
-  setTimeout(() => navigate('/login'), 1200);
-}
-//
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -115,18 +97,18 @@ function handleRegister() {
 
 <button
   type="button"
-  onClick={() => setAccountType('user')}
+  onClick={() => setAccountType('persona')}
   style={{
     flex: 1,
     padding: '12px',
     borderRadius: '8px',
     border:
-      accountType === 'user'
+      accountType === 'persona'
         ? '2px solid #1a6b4a'
         : '1px solid #c6eadb',
 
     background:
-      accountType === 'user'
+      accountType === 'persona'
         ? '#eaf5f0'
         : '#fff',
 
