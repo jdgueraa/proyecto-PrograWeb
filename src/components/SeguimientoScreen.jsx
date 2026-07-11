@@ -25,12 +25,17 @@ export default function SeguimientoScreen({ user }) {
         .filter(item => item.ongId === 1)
         .reduce((suma, item) => suma + item.horasAportadas, 0);
 
+    const horasEducaContigo = historialVoluntariados
+        .filter(item => item.ongId === 2)
+        .reduce((suma, item) => suma + item.horasAportadas, 0);
+
     const horasSaludParaTodos = historialVoluntariados
         .filter(item => item.ongId === 3)
         .reduce((suma, item) => suma + item.horasAportadas, 0);
 
     // Porcentaje barra
     const porcentajeBarraVerde = totalHorasDonadas > 0 ? (horasTierraVerde / totalHorasDonadas) * 100 : 0;
+    const porcentajeBarraAzul = totalHorasDonadas > 0 ? (horasEducaContigo / totalHorasDonadas) * 100 : 0;
     const porcentajeBarraRoja = totalHorasDonadas > 0 ? (horasSaludParaTodos / totalHorasDonadas) * 100 : 0;
 
 
@@ -72,6 +77,16 @@ export default function SeguimientoScreen({ user }) {
                             </div>
                         </div>
 
+                        {/* Barra para Educa Contigo */}
+                        <div className="bar-group">
+                            <span className="bar-label">📚 Educa Contigo</span>
+                            <div className="bar-track">
+                                <div className="bar-fill-color color-azul" style={{ width: `${porcentajeBarraAzul}%` }}>
+                                    <span className="bar-percentage">{horasEducaContigo} hrs</span>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Barra para Salud Para Todos */}
                         <div className="bar-group">
                             <span className="bar-label">🏥 Salud Para Todos</span>
@@ -81,6 +96,8 @@ export default function SeguimientoScreen({ user }) {
                                 </div>
                             </div>
                         </div>
+
+                        
                     </div>
                 </div>
 
@@ -119,7 +136,7 @@ export default function SeguimientoScreen({ user }) {
                                                 width: `${porcentajeGlobal}%`,
                                                 // CAMBIO: el ongId no viene directo en la donación,
                                                 // vive dentro de su campaña (globalCamp.ongId).
-                                                backgroundColor: globalCamp.ongId === 3 ? '#3498db' : '#2ecc71'
+                                                backgroundColor: globalCamp.ongId === 1 ? '#2ecc71' : (globalCamp.ongId === 2 ? '#3498db' : '#e74c3c')
                                             }}
                                         ></div>
                                     </div>
