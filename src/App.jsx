@@ -180,7 +180,7 @@ export default function App() {
         } />
         <Route path="/perfil/:id" element={
           <AppLayout user={authUser} onLogout={handleLogout}>
-            <ProfileScreen user={authUser} onUpdateUser={handleUpdateUser} />
+            <ProfileScreen user={authUser} onUpdateUser={handleUpdateUser} onDonate={handleDonate} />
           </AppLayout>
         } />
 

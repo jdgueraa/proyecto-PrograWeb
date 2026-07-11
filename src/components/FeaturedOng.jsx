@@ -13,7 +13,7 @@ function FeaturedOng({ ong, onNavigate }) {
         </span>
         <h2 className="home-screen-featured-title">{ong.name}</h2>
         <p style={{ fontSize: '14px', color: '#4b5563', lineHeight: '1.6', margin: '0 0 16px 0' }}>
-          Ubicada en <strong>{ong.location}</strong>, esta organización destaca por su increíble labor social y su transparencia en la gestión de proyectos de ayuda comunitaria.
+          {ong.mision || `Ubicada en ${ong.location || 'Perú'}, esta organización destaca por su increíble labor social y su transparencia en la gestión de proyectos de ayuda comunitaria.`}
         </p>
         <div className="home-screen-featured-badges">
           <span className="home-screen-badge" style={{ backgroundColor: '#eff6ff', color: '#1d4ed8' }}>{categoriaReal}</span>
@@ -24,7 +24,7 @@ function FeaturedOng({ ong, onNavigate }) {
         </button>
       </div>
       <div className="home-screen-featured-aside">
-        <span style={{ fontSize: '40px', display: 'block', marginBottom: '8px' }}>🏥</span>
+        <span style={{ fontSize: '40px', display: 'block', marginBottom: '8px' }}>{ong.emoji || '🏢'}</span>
         <p style={{ margin: 0, fontWeight: 'bold', color: '#1a6b4a' }}>{ong.name}</p>
       </div>
     </div>
