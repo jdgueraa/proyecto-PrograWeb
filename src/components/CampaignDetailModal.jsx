@@ -15,21 +15,17 @@
 //   3. Si tiene suficientes créditos → se confirma y se muestra mensaje de éxito
 //   4. Si no tiene créditos → se muestra error
 //
-// TODO(backend): `onDonate` (en App.jsx) ahora es `async` porque le pide
-// al backend que registre la donación de verdad. Más abajo,
-// `handleConfirmarDonacion` llama a `onDonate(...)` y de inmediato pone
-// `setDonationStatus('success')`, sin esperar la respuesta — funciona
-// para la demo, pero si el backend llegara a rechazar la donación (por
-// ejemplo por una condición de carrera en los créditos), igual se
-// mostraría "éxito". Para que sea correcto: hacer
-// `async function handleConfirmarDonacion()` y usar
-// `try { await onDonate(campaña.id, montoFinal); setDonationStatus('success'); }
-// catch (err) { setDonationStatus('error'); }`.
+// CONECTADO AL BACKEND:
+// `handleConfirmarDonacion` ahora espera (con "await") la respuesta
+// real del backend antes de mostrar el mensaje de éxito. Si el backend
+// rechaza la donación por algún motivo, se muestra un mensaje de error
+// en vez de "éxito" a la fuerza.
 // ─────────────────────────────────────────────────────────────
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Montos de donación rápida que aparecen como botones
 const MONTOS_RAPIDOS = [10, 25, 50, 100];
 
 export default function CampaignDetailModal({ campaña, user, onDonate, onClose }) {
@@ -39,8 +35,8 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
   const [monto, setMonto] = useState('');
   const [montoPersonalizado, setMontoPersonalizado] = useState('');
   const [donationStatus, setDonationStatus] = useState(null);
+  // Guardamos el saldo ANTES de donar para mostrarlo correctamente en el mensaje de éxito
   const [saldoAntesDonacion, setSaldoAntesDonacion] = useState(0);
-  const [cargandoEnvio, setCargandoEnvio] = useState(false);
 
   useEffect(() => {
     const handleKey = e => { if (e.key === 'Escape') onClose(); };
@@ -63,21 +59,23 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
     ? new Date(campaña.fechaFin).toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })
     : null;
 
+  // "async" quiere decir que esta función va a esperar una respuesta
+  // del backend antes de seguir. Usamos "await" para eso, y "try/catch"
+  // para saber si el backend aceptó la donación (try) o hubo algún
+  // problema al guardarla (catch).
   async function handleConfirmarDonacion() {
     if (!user) { setDonationStatus('noauth'); return; }
     if (!montoFinal || montoFinal <= 0) return;
     if ((user.creditos || 0) < montoFinal) { setDonationStatus('error'); return; }
+    // Guardamos el saldo actual ANTES de llamar onDonate,
+    // porque onDonate actualiza el usuario y React re-renderiza con el nuevo saldo
+    setSaldoAntesDonacion(user.creditos || 0);
 
     try {
-      setCargandoEnvio(true);
-      setSaldoAntesDonacion(user.creditos || 0);
       await onDonate(campaña.id, montoFinal);
       setDonationStatus('success');
-    } catch (err) {
-      console.error("Error al procesar la donación en el servidor:", err);
-      setDonationStatus('error'); 
-    } finally {
-      setCargandoEnvio(false);
+    } catch (error) {
+      setDonationStatus('server-error');
     }
   }
 
@@ -161,11 +159,12 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
         <div className="modal-section">
           <h4 className="modal-section-title">Recaudación</h4>
           <div className="admin-progress-row">
-            <span className="admin-progress-money">
-              S/. {c.actual.toLocaleString()} / {c.meta.toLocaleString()}
-            </span>
-            <strong className="admin-progress-percent">{pct}%</strong>
-          </div>
+          <span className="admin-progress-money">
+          S/. {c.actual.toLocaleString()} / {c.meta.toLocaleString()}
+          </span>
+
+  <strong className="admin-progress-percent">{pct}%</strong>
+</div>
           <div className="donations-progress-bar-bg modal-progress-bar">
             <div
               className="donations-progress-bar-fill"
@@ -203,9 +202,15 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
                 </p>
               </div>
             )}
+            {/* Mensaje si el backend no pudo procesar la donación */}
+            {donationStatus === 'server-error' && (
+              <div className="donate-error-alert">
+                No se pudo procesar tu donación. Intenta de nuevo en unos segundos.
+              </div>
+            )}
             {donationStatus === 'error' && (
               <div className="donate-error-alert">
-                Créditos insuficientes o error en el servidor. Tienes S/. {user?.creditos || 0} disponibles.
+                Créditos insuficientes. Tienes S/. {user?.creditos || 0} disponibles.
               </div>
             )}
             {donationStatus !== 'success' && (
@@ -226,7 +231,6 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
                       {MONTOS_RAPIDOS.map(m => (
                         <button
                           key={m}
-                          disabled={cargandoEnvio}
                           className={`donate-amount-btn ${monto === String(m) ? 'donate-amount-btn--active' : ''}`}
                           onClick={() => { setMonto(String(m)); setMontoPersonalizado(''); setDonationStatus(null); }}
                         >
@@ -234,7 +238,6 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
                         </button>
                       ))}
                       <button
-                        disabled={cargandoEnvio}
                         className={`donate-amount-btn ${monto === 'custom' ? 'donate-amount-btn--active' : ''}`}
                         onClick={() => { setMonto('custom'); setDonationStatus(null); }}
                       >
@@ -246,7 +249,6 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
                         className="donate-custom-input"
                         type="number"
                         min="1"
-                        disabled={cargandoEnvio}
                         placeholder="Ingresa el monto (S/.)"
                         value={montoPersonalizado}
                         onChange={e => { setMontoPersonalizado(e.target.value); setDonationStatus(null); }}
@@ -256,14 +258,13 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
                       <button
                         className="donate-confirm-btn"
                         onClick={handleConfirmarDonacion}
-                        disabled={!montoFinal || montoFinal <= 0 || cargandoEnvio}
+                        disabled={!montoFinal || montoFinal <= 0}
                       >
-                        {cargandoEnvio ? 'Procesando...' : 'Confirmar donación'}
+                        Confirmar donación
                       </button>
                       <button
                         className="donate-cancel-btn"
                         onClick={() => { setDonando(false); setDonationStatus(null); }}
-                        disabled={cargandoEnvio}
                       >
                         Cancelar
                       </button>

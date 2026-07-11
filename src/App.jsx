@@ -165,22 +165,25 @@ export default function App() {
         <Route path="/login"    element={<LoginScreen onLogin={handleLogin} />} />
         <Route path="/registro" element={<RegisterScreen />} />
         <Route path="/home" element={
-          !authUser 
-          ? <Navigate to="/login" replace />
-          : authUser.role === 'ong'
-          ? <Navigate to="/admin" replace />
-          : (
-        <AppLayout user={authUser} onLogout={handleLogout}>
-          <HomeScreen user={authUser} onDonate={handleDonate} />
-        </AppLayout>
-            )
+        authUser?.role === 'ong'
+        ? <Navigate to="/admin" replace />
+        : <AppLayout user={authUser} onLogout={handleLogout}><HomeScreen /></AppLayout>
         } />
         <Route path="/buscar" element={
           <AppLayout user={authUser} onLogout={handleLogout}><SearchScreen /></AppLayout>
         } />
         <Route path="/perfil/:id" element={
           <AppLayout user={authUser} onLogout={handleLogout}>
-            <ProfileScreen user={authUser} onUpdateUser={handleUpdateUser} onDonate={handleDonate} />
+            {/* campañas/voluntariados: para que ProfileScreen pueda mostrar
+                las de esa ONG en particular, filtrando por ongId.
+                onFollowChange: para refrescar al usuario después de
+                seguir/dejar de seguir una ONG. */}
+            <ProfileScreen
+              user={authUser}
+              campañas={campañas}
+              voluntariados={voluntariados}
+              onFollowChange={refreshUser}
+            />
           </AppLayout>
         } />
 
