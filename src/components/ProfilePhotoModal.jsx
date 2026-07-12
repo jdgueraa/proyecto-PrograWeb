@@ -7,24 +7,32 @@ export default function ProfilePhotoModal({ user, isOpen, initialUrl = '', onClo
   const [valid, setValid] = useState(true);
 
   useEffect(() => {
-    setUrl(initialUrl || '');    
-    setValid(true);
-  }, [initialUrl, isOpen]);
+    if (isOpen) {
+      setUrl(initialUrl || '');
+      setName(user?.fullName || '');
+      setBio(user?.biografia || '');
+      setValid(true);
+    }
+  }, [initialUrl, isOpen, user]);
 
   if (!isOpen) return null;
 
   function handleSave() {
     const nombre = (name || '').trim();
     const descrip = (bio || '').trim();
-    const trimmed = (url || '').trim();
-    if (!trimmed) return;
-    if (!/^https?:\/\//i.test(trimmed)) {
+    const trimmedUrl = (url || '').trim();
+    
+    if (!trimmedUrl) return; 
+        
+    if (!/^https?:\/\//i.test(trimmedUrl)) {
       setValid(false);
       return;
-    }
-    onSave(nombre,descrip,trimmed);
+    }        
+    onSave(nombre, descrip, trimmedUrl);
     onClose();
   }
+
+  const isOnlyUrlMode = Number(user?.id) === 2;
 
   return (
     <div className="modal-overlay">
@@ -38,35 +46,43 @@ export default function ProfilePhotoModal({ user, isOpen, initialUrl = '', onClo
 
         <div className="photo-modal-header">
           <h2> 📝 Configurar perfil</h2>
-          <p>Puedes actualizar diferentes secciones de tu perfil</p>
+          <p>
+            {isOnlyUrlMode 
+              ? "Actualiza la foto de tu perfil" 
+              : "Puedes actualizar diferentes secciones de tu perfil"}
+          </p>
         </div>
+        
+        {!isOnlyUrlMode && (
+          <>
+            <div className="photo-modal-form-group">
+              <label className="photo-modal-label">
+                Nombre de perfil
+              </label>
+              <input
+                className={`photo-modal-input ${!valid ? 'invalid' : ''}`}
+                type="text"
+                placeholder="Dale un nuevo nombre a tu perfil"
+                value={name}
+                onChange={e => { setName(e.target.value); setValid(true); }}
+              />
+            </div>
 
-        <div className="photo-modal-form-group">
-          <label className="photo-modal-label">
-            Nombre de perfil
-          </label>
-          <input
-            className={`photo-modal-input ${!valid ? 'invalid' : ''}`}
-            type="text"
-            placeholder="Dale un nuevo nombre a tu perfil"
-            value={name}
-            onChange={e => { setName(e.target.value); setValid(true); }}
-          />
-        </div>
-
-        <div className="photo-modal-form-group">
-          <label className="photo-modal-label">
-            Descripción
-          </label>
-          <input
-            className={`photo-modal-input ${!valid ? 'invalid' : ''}`}
-            type="text"
-            placeholder="Expresa lo que quieras"
-            value={bio}
-            onChange={e => { setBio(e.target.value); setValid(true); }}
-          />
-        </div>
-
+            <div className="photo-modal-form-group">
+              <label className="photo-modal-label">
+                Descripción
+              </label>
+              <input
+                className={`photo-modal-input ${!valid ? 'invalid' : ''}`}
+                type="text"
+                placeholder="Expresa lo que quieras"
+                value={bio}
+                onChange={e => { setBio(e.target.value); setValid(true); }}
+              />
+            </div>
+          </>
+        )}
+        
         <div className="photo-modal-form-group">
           <label className="photo-modal-label">
             URL de la imagen

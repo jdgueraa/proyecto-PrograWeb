@@ -63,7 +63,7 @@ export default function LoginScreen({ onLogin }) {
           ¿No tienes cuenta? Regístrate
         </button>
       </div>
- 
+
     </div>
   );
 }
