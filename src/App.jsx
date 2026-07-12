@@ -140,7 +140,7 @@ export default function App() {
         <Route path="/MiPerfil" element={authUser
           ? <AppLayout user={authUser} onLogout={handleLogout}>
               {authUser?.role === 'ong'
-                ? <ProfileOngScreen user={authUser} onUpdateUser={handleUpdateUser} />
+                ? <ProfileOngScreen user={authUser} onUpdateUser={handleUpdateUser} onProfileSaved={refreshUser} />
                 : <MyProfileScreen user={authUser} onUpdateUser={handleUpdateUser} onCreditsChange={refreshUser} />}
             </AppLayout>
           : <Navigate to="/login" replace />
