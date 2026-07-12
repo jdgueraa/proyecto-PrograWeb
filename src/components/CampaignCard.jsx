@@ -2,6 +2,9 @@
 import React from 'react';
 
 export default function CampaignCard({ campaña, onAction, onCardClick }) {
+  const montoActual = Number(campaña.actual || 0);
+  const montoMeta = Number(campaña.meta || 0);
+  
   const calculoPorcentaje = campaña.meta > 0
     ? Math.round((campaña.actual / campaña.meta) * 100)
     : 0;

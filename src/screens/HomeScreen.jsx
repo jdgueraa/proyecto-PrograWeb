@@ -14,21 +14,54 @@
 // El resto de la lógica (`.find(o => o.featured === true)`,
 // `.filter(c => c.urgent === true)`) no cambia, ya funciona igual sobre
 // cualquier arreglo real que venga del backend.
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ongs, campañas } from '../data.json';
+
+import { api } from '../api';
 
 import CampaignCard from '../components/CampaignCard';
 import FeaturedOng from '../components/FeaturedOng';
 import CampaignDetailModal from '../components/CampaignDetailModal';
 import '../App.css';
 
-export default function HomeScreen() {
+export default function HomeScreen({ user, onDonate }) {
   const navigate = useNavigate();
   const [selectedCampaña, setSelectedCampaña] = useState(null);
 
-  const ongDestacada      = ongs.find(o => o.featured === true) || ongs[0];
-  const campañasUrgentes  = campañas.filter(c => c.urgent === true);
+  const [ongsList, setOngsList] = useState([]);
+  const [campanasList, setCampanasList] = useState([]);
+
+  async function handleLocalDonate(campañaId, amount) {
+    await onDonate(campañaId, amount);
+
+    setCampanasList(prevList => 
+      prevList.map(c => {
+        if (c.id === campañaId) {
+          const nuevoMonto = c.actual + amount;
+          const nuevoObjeto = { ...c, actual: nuevoMonto };
+          if (selectedCampaña?.id === campañaId) {
+            setSelectedCampaña(nuevoObjeto);
+          }
+          return nuevoObjeto;
+        }
+        return c;
+      })
+    );
+  }
+
+  useEffect(() => {
+    api.get('/campanas')
+      .then(setCampanasList)
+      .catch(() => setCampanasList([]));
+
+    api.get('/ongs')
+      .then(setOngsList)
+      .catch(() => setOngsList([]));
+  }, []);
+
+  const ongDestacada = ongsList.find(o => o.featured === true) || ongsList[0];
+  const campañasUrgentes = campanasList.filter(c => c.urgent === true);
+  const totalRegiones = [...new Set(ongsList.map(o => o.location).filter(Boolean))].length;
 
   return (
     <div className="fade-in home-screen-wrapper">
@@ -49,17 +82,17 @@ export default function HomeScreen() {
       <div className="home-screen-stats-grid">
         <div className="home-screen-stat-card">
           <span>🏢</span>
-          <h3 className="home-screen-stat-number">{ongs.length}</h3>
+          <h3 className="home-screen-stat-number">{ongsList.length}</h3>
           <p className="home-screen-stat-label">Organizaciones Aliadas</p>
         </div>
         <div className="home-screen-stat-card">
           <span>🌍</span>
-          <h3 className="home-screen-stat-number">4</h3>
+          <h3 className="home-screen-stat-number">{totalRegiones || 0}</h3>
           <p className="home-screen-stat-label">Regiones Impactadas</p>
         </div>
         <div className="home-screen-stat-card">
           <span>🤝</span>
-          <h3 className="home-screen-stat-number">{campañas.length}</h3>
+          <h3 className="home-screen-stat-number">{campanasList.length}</h3>
           <p className="home-screen-stat-label">Campañas Activas</p>
         </div>
       </div>
@@ -92,6 +125,8 @@ export default function HomeScreen() {
       {selectedCampaña && (
         <CampaignDetailModal
           campaña={selectedCampaña}
+          user={user}
+          onDonate={handleLocalDonate}
           onClose={() => setSelectedCampaña(null)}
         />
       )}
