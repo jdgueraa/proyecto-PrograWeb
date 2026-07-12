@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react';
-import dataJson from '../data.json';
+import React, { useState, useEffect } from 'react';
+import { api } from '../api';
 
 const CATEGORIAS = ['Medio Ambiente', 'Educación', 'Salud', 'Agua', 'Pobreza'];
 const MODALIDADES = ['Presencial', 'Virtual', 'Híbrido'];
@@ -28,12 +27,32 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
   const [mensajeCampaña, setMensajeCampaña] = useState('');
   const [mensajeVol, setMensajeVol] = useState('');
 
-  const miOng = dataJson.ongs.find(o => o.id === user?.ongId);
+  const [donantesPorCampaña, setDonantesPorCampaña] = useState({});
+  const [postulantesPorVol, setPostulantesPorVol] = useState({});
+
+  const miOng = user?.ong;
   const misCampañas = campañas.filter(c => c.ongId === user?.ongId);
   const misVoluntariados = voluntariados.filter(v => v.ongId === user?.ongId);
 
-  const donacionesLog = JSON.parse(localStorage.getItem('donacionesLog') || '[]');
-  const postulacionesLog = JSON.parse(localStorage.getItem('postulaciones') || '[]');
+  useEffect(() => {
+    misCampañas.forEach(c => {
+      api.get('/campanas/' + c.id + '/donaciones').then(function (data) {
+        setDonantesPorCampaña(function (prev) {
+          return { ...prev, [c.id]: data };
+        });
+      });
+    });
+  }, [campañas, user]);
+
+  useEffect(() => {
+    misVoluntariados.forEach(v => {
+      api.get('/voluntariados/' + v.id + '/postulaciones').then(function (data) {
+        setPostulantesPorVol(function (prev) {
+          return { ...prev, [v.id]: data };
+        });
+      });
+    });
+  }, [voluntariados, user]);
 
   function handleCrearCampaña() {
     if (!formCampaña.name || !formCampaña.desc || !formCampaña.meta || !formCampaña.location) {
@@ -41,24 +60,14 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
       return;
     }
     onCreateCampaña({
-      id: Date.now(),
       name: formCampaña.name.trim(),
       desc: formCampaña.desc.trim(),
-      impacto: formCampaña.desc.trim(),
       meta: parseInt(formCampaña.meta),
-      actual: 0,
-      donantes: 0,
-      badge: 'Activa',
-      badgeClass: 'badge-active',
-      urgent: formCampaña.urgent,
       category: formCampaña.category,
-      ongId: user.ongId,
-      ongName: miOng?.name || 'Mi ONG',
       location: formCampaña.location.trim(),
-      fechaInicio: formCampaña.fechaInicio || new Date().toISOString().split('T')[0],
-      fechaFin: formCampaña.fechaFin || '',
-      actualizacion: '',
-      beneficiarios: 0,
+      fechaInicio: formCampaña.fechaInicio,
+      fechaFin: formCampaña.fechaFin,
+      urgent: formCampaña.urgent,
     });
     setFormCampaña({ name: '', desc: '', meta: '', category: 'Educación', location: '', fechaInicio: '', fechaFin: '', urgent: false });
     setMensajeCampaña('¡Campaña creada! Ya aparece en la sección de Donaciones.');
@@ -71,24 +80,14 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
       return;
     }
     onCreateVoluntariado({
-      id: Date.now(),
       name: formVol.name.trim(),
       desc: formVol.desc.trim(),
-      impacto: formVol.desc.trim(),
-      actividades: [],
-      requisitos: [],
-      ongId: user.ongId,
-      ongName: miOng?.name || 'Mi ONG',
-      location: formVol.location.trim(),
       category: formVol.category,
       modalidad: formVol.modalidad,
       cupos: parseInt(formVol.cupos),
-      cuposOcupados: 0,
-      duracion: formVol.duracion || 'Por definir',
-      fechaInicio: formVol.fechaInicio || new Date().toISOString().split('T')[0],
-      badge: 'Activo',
-      badgeClass: 'badge-active',
-      actualizacion: '',
+      duracion: formVol.duracion,
+      fechaInicio: formVol.fechaInicio,
+      location: formVol.location.trim(),
     });
     setFormVol({ name: '', desc: '', category: 'Educación', modalidad: 'Presencial', cupos: '', duracion: '', fechaInicio: '', location: '' });
     setMensajeVol('¡Voluntariado creado! Ya aparece en la sección de Voluntariado.');
@@ -121,7 +120,6 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
         ))}
       </div>
 
-      {/* ── Mis Campañas ── */}
       {activeTab === 'campañas' && (
         <div>
           {misCampañas.length === 0 ? (
@@ -135,7 +133,7 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
           ) : (
             <div className="admin-item-list">
               {misCampañas.map(c => {
-                const donantes = donacionesLog.filter(d => d.campañaId === c.id);
+                const donantes = donantesPorCampaña[c.id] || [];
                 const pct = Math.min(100, Math.round((c.actual / c.meta) * 100));
                 return (
                   <div key={c.id} className="admin-item-card">
@@ -158,9 +156,9 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
                       <div className="admin-log-list">
                         {donantes.map((d, i) => (
                           <div key={i} className="admin-log-row">
-                            <span className="admin-log-name">👤 {d.userName}</span>
-                            <span className="admin-log-amount">S/. {d.amount}</span>
-                            <span className="admin-log-date">{new Date(d.fecha).toLocaleDateString('es-PE')}</span>
+                            <span className="admin-log-name">👤 {d.user?.fullName}</span>
+                            <span className="admin-log-amount">S/. {d.monto}</span>
+                            <span className="admin-log-date">{new Date(d.createdAt).toLocaleDateString('es-PE')}</span>
                           </div>
                         ))}
                       </div>
@@ -173,7 +171,6 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
         </div>
       )}
 
-      {/* ── Mis Voluntariados ── */}
       {activeTab === 'voluntariados' && (
         <div>
           {misVoluntariados.length === 0 ? (
@@ -187,7 +184,7 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
           ) : (
             <div className="admin-item-list">
               {misVoluntariados.map(v => {
-                const postulantes = postulacionesLog.filter(p => p.voluntariadoId === v.id);
+                const postulantes = postulantesPorVol[v.id] || [];
                 const cuposLibres = v.cupos - v.cuposOcupados;
                 return (
                   <div key={v.id} className="admin-item-card">
@@ -206,9 +203,9 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
                       <div className="admin-log-list">
                         {postulantes.map((p, i) => (
                           <div key={i} className="admin-log-row">
-                            <span className="admin-log-name">👤 {p.userName}</span>
-                            <span className="admin-log-email">{p.userEmail}</span>
-                            <span className="admin-log-date">{new Date(p.fecha).toLocaleDateString('es-PE')}</span>
+                            <span className="admin-log-name">👤 {p.user?.fullName}</span>
+                            <span className="admin-log-email">{p.user?.email}</span>
+                            <span className="admin-log-date">{new Date(p.createdAt).toLocaleDateString('es-PE')}</span>
                           </div>
                         ))}
                       </div>
@@ -221,7 +218,6 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
         </div>
       )}
 
-      {/* ── Crear Campaña ── */}
       {activeTab === 'crear-campaña' && (
         <div className="admin-form-section">
           <h2 className="admin-form-title">Nueva campaña de donación</h2>
@@ -274,7 +270,6 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
         </div>
       )}
 
-      {/* ── Crear Voluntariado ── */}
       {activeTab === 'crear-vol' && (
         <div className="admin-form-section">
           <h2 className="admin-form-title">Nuevo voluntariado</h2>

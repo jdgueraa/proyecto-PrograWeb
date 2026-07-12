@@ -1,67 +1,60 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { ongs } from '../data.json';
+import { api } from '../api';
 import ProfilePhotoModal from '../components/ProfilePhotoModal.jsx';
 
-export default function ProfileOngScreen({ user, onUpdateUser }) {
-  
-  const ongBase = ongs.find(ong => ong.id === user?.ongId);
-  
+export default function ProfileOngScreen({ user, onUpdateUser, onProfileSaved }) {
+
+  const ongBase = user?.ong;
+
   function getDatosActuales() {
     return {
-      name:     user?.ongProfile?.name     || ongBase?.name     || '',
-      location: user?.ongProfile?.location || ongBase?.location || '',
-      desc:     user?.ongProfile?.desc     || ongBase?.desc     || '',
-      mision:   user?.ongProfile?.mision   || ongBase?.mision   || '',
-      email:    user?.ongProfile?.email    || user?.email       || '',
-      telefono: user?.ongProfile?.telefono || '',
-      web:      user?.ongProfile?.web      || '',
-      emoji:    user?.ongProfile?.emoji    || ongBase?.emoji    || '🌿',
-      color:    user?.ongProfile?.color    || ongBase?.color    || '#d4f5e9',
+      name:     ongBase?.name     || '',
+      location: ongBase?.location || '',
+      desc:     ongBase?.desc     || '',
+      mision:   ongBase?.mision   || '',
+      email:    ongBase?.email    || user?.email || '',
+      telefono: ongBase?.telefono || '',
+      web:      ongBase?.web      || '',
+      emoji:    ongBase?.emoji    || '🌿',
+      color:    ongBase?.color    || '#d4f5e9',
     };
   }
-  
+
   const [ongForm, setOngForm] = useState(getDatosActuales);
-  
   const [editando, setEditando] = useState(false);
-  
   const [fotoUrl, setFotoUrl] = useState(user?.photoUrl || '');
-  
   const [showPhotoModal, setShowPhotoModal] = useState(false);
-  
+
   if (!user) return <Navigate to="/login" replace />;
-  
+
   function handleInput(e) {
     const { name, value } = e.target;
     setOngForm(prev => ({ ...prev, [name]: value }));
   }
-  
+
   function abrirEdicion() {
     setOngForm(getDatosActuales());
     setEditando(true);
   }
-  
+
   function guardarFoto(url) {
     setFotoUrl(url);
-    if (onUpdateUser) onUpdateUser({ ...user, photoUrl: url });
+    if (onUpdateUser) onUpdateUser({ photoUrl: url });
   }
-  
-  function guardarPerfil() {
-    const updatedUser = {
-      ...user,
-      fullName: ongForm.name,
-      ongProfile: { ...ongForm },
-    };
-    if (onUpdateUser) onUpdateUser(updatedUser);
+
+  async function guardarPerfil() {
+    await api.put('/ongs/' + user.ong.id, ongForm);
+    if (onProfileSaved) await onProfileSaved();
     setEditando(false);
   }
-  
+
   const datos = getDatosActuales();
 
   return (
     <div className="profile-dashboard">
       <h1 className="profile-page-title">Perfil ONG</h1>
-      
+
       <div className="profile-hero">
         <div
           className="profile-banner"
@@ -88,20 +81,21 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
           </div>
         </div>
       </div>
-      
+
       <ProfilePhotoModal
+        user={user}
         isOpen={showPhotoModal}
         initialUrl={fotoUrl}
         onClose={() => setShowPhotoModal(false)}
-        onSave={(url) => { guardarFoto(url); setShowPhotoModal(false); }}
+        onSave={(nombre, descripcion, url) => { guardarFoto(url); setShowPhotoModal(false); }}
       />
-      
+
       <div className="dashboard-section">
         <h3>Información de la ONG</h3>
-        
+
         {!editando && (
           <div className="ong-profile-card">
-            
+
             <div className="ong-profile-header">
               <div className="ong-profile-emoji-badge" style={{ backgroundColor: datos.color }}>
                 {datos.emoji}
@@ -111,7 +105,7 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
                 <p className="ong-profile-location">📍 {datos.location || 'Ubicación no registrada'}</p>
               </div>
             </div>
-            
+
             <div className="ong-profile-body">
               {datos.desc && (
                 <div>
@@ -126,7 +120,7 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
                 </div>
               )}
             </div>
-            
+
             <div className="ong-profile-contacts">
               <div className="ong-profile-contact-item">
                 <span className="ong-profile-contact-label">📧 Correo</span>
@@ -141,16 +135,16 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
                 <span className="ong-profile-contact-value">{datos.web || '—'}</span>
               </div>
             </div>
-            
+
             <button className="ong-profile-edit-btn" onClick={abrirEdicion}>
               ✏️ Editar perfil ONG
             </button>
           </div>
         )}
-        
+
         {editando && (
           <div className="ong-edit-form">
-            
+
             <label>
               Nombre de la ONG
               <input
@@ -161,7 +155,6 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
                 placeholder="Ej: Tierra Verde Perú"
               />
             </label>
-
 
             <div className="ong-edit-form-row">
               <label>
@@ -240,7 +233,7 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
                 />
               </label>
             </div>
-        
+
             <div className="profile-action-row">
               <button className="action-btn-primary" onClick={guardarPerfil}>
                 Guardar cambios
