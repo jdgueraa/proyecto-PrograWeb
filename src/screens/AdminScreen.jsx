@@ -1,5 +1,19 @@
-import React, { useState } from 'react';
-import dataJson from '../data.json';
+// AdminScreen.jsx — YA CONECTADO al backend real.
+//
+// Cambios respecto a la versión con data.json + localStorage:
+//   1. Ya no se importa dataJson. La ONG propia viene en `user.ong`
+//      (gracias a GET /api/me).
+//   2. `handleCrearCampaña` / `handleCrearVoluntariado` ahora mandan SOLO
+//      los campos del formulario a `onCreateCampaña` / `onCreateVoluntariado`
+//      (funciones que App.jsx debe implementar llamando a
+//      `api.post('/campanas', datos)` / `api.post('/voluntariados', datos)`
+//      y devolviendo la campaña/voluntariado ya creado con su id real).
+//   3. Los donantes y postulantes ya NO salen de localStorage: se piden al
+//      backend con `GET /campanas/:id/donaciones` y
+//      `GET /voluntariados/:id/postulaciones`, una vez por cada
+//      campaña/voluntariado propio, cada vez que cambia la lista.
+import React, { useState, useEffect } from 'react';
+import { api } from '../api';
 
 const CATEGORIAS = ['Medio Ambiente', 'Educación', 'Salud', 'Agua', 'Pobreza'];
 const MODALIDADES = ['Presencial', 'Virtual', 'Híbrido'];
@@ -26,72 +40,115 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
 
   const [mensajeCampaña, setMensajeCampaña] = useState('');
   const [mensajeVol, setMensajeVol] = useState('');
+  const [creandoCampaña, setCreandoCampaña] = useState(false);
+  const [creandoVol, setCreandoVol] = useState(false);
 
-  const miOng = dataJson.ongs.find(o => o.id === user?.ongId);
+  // Donantes/postulantes por id, traídos del backend
+  const [donantesPorCampaña, setDonantesPorCampaña] = useState({});
+  const [postulantesPorVoluntariado, setPostulantesPorVoluntariado] = useState({});
+
+  const miOng = user?.ong;
   const misCampañas = campañas.filter(c => c.ongId === user?.ongId);
   const misVoluntariados = voluntariados.filter(v => v.ongId === user?.ongId);
 
-  const donacionesLog = JSON.parse(localStorage.getItem('donacionesLog') || '[]');
-  const postulacionesLog = JSON.parse(localStorage.getItem('postulaciones') || '[]');
+  // Cada vez que cambia la lista de campañas propias, pedimos sus donantes
+  useEffect(() => {
+    if (activeTab !== 'campañas' || misCampañas.length === 0) return;
+    let cancelado = false;
 
-  function handleCrearCampaña() {
+    (async () => {
+      const entradas = await Promise.all(
+        misCampañas.map(async (c) => {
+          try {
+            const donaciones = await api.get(`/campanas/${c.id}/donaciones`);
+            return [c.id, donaciones];
+          } catch {
+            return [c.id, []];
+          }
+        })
+      );
+      if (!cancelado) setDonantesPorCampaña(Object.fromEntries(entradas));
+    })();
+
+    return () => { cancelado = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, misCampañas.map(c => c.id).join(',')]);
+
+  // Cada vez que cambia la lista de voluntariados propios, pedimos sus postulantes
+  useEffect(() => {
+    if (activeTab !== 'voluntariados' || misVoluntariados.length === 0) return;
+    let cancelado = false;
+
+    (async () => {
+      const entradas = await Promise.all(
+        misVoluntariados.map(async (v) => {
+          try {
+            const postulaciones = await api.get(`/voluntariados/${v.id}/postulaciones`);
+            return [v.id, postulaciones];
+          } catch {
+            return [v.id, []];
+          }
+        })
+      );
+      if (!cancelado) setPostulantesPorVoluntariado(Object.fromEntries(entradas));
+    })();
+
+    return () => { cancelado = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, misVoluntariados.map(v => v.id).join(',')]);
+
+  async function handleCrearCampaña() {
     if (!formCampaña.name || !formCampaña.desc || !formCampaña.meta || !formCampaña.location) {
       setMensajeCampaña('Completa todos los campos obligatorios.');
       return;
     }
-    onCreateCampaña({
-      id: Date.now(),
-      name: formCampaña.name.trim(),
-      desc: formCampaña.desc.trim(),
-      impacto: formCampaña.desc.trim(),
-      meta: parseInt(formCampaña.meta),
-      actual: 0,
-      donantes: 0,
-      badge: 'Activa',
-      badgeClass: 'badge-active',
-      urgent: formCampaña.urgent,
-      category: formCampaña.category,
-      ongId: user.ongId,
-      ongName: miOng?.name || 'Mi ONG',
-      location: formCampaña.location.trim(),
-      fechaInicio: formCampaña.fechaInicio || new Date().toISOString().split('T')[0],
-      fechaFin: formCampaña.fechaFin || '',
-      actualizacion: '',
-      beneficiarios: 0,
-    });
-    setFormCampaña({ name: '', desc: '', meta: '', category: 'Educación', location: '', fechaInicio: '', fechaFin: '', urgent: false });
-    setMensajeCampaña('¡Campaña creada! Ya aparece en la sección de Donaciones.');
-    setTimeout(() => setMensajeCampaña(''), 4000);
+    setCreandoCampaña(true);
+    try {
+      await onCreateCampaña({
+        name: formCampaña.name.trim(),
+        desc: formCampaña.desc.trim(),
+        meta: parseInt(formCampaña.meta, 10),
+        category: formCampaña.category,
+        location: formCampaña.location.trim(),
+        fechaInicio: formCampaña.fechaInicio || undefined,
+        fechaFin: formCampaña.fechaFin || undefined,
+        urgent: formCampaña.urgent,
+      });
+      setFormCampaña({ name: '', desc: '', meta: '', category: 'Educación', location: '', fechaInicio: '', fechaFin: '', urgent: false });
+      setMensajeCampaña('¡Campaña creada! Ya aparece en la sección de Donaciones.');
+      setTimeout(() => setMensajeCampaña(''), 4000);
+    } catch (err) {
+      setMensajeCampaña(err.message || 'No se pudo crear la campaña.');
+    } finally {
+      setCreandoCampaña(false);
+    }
   }
 
-  function handleCrearVoluntariado() {
+  async function handleCrearVoluntariado() {
     if (!formVol.name || !formVol.desc || !formVol.cupos || !formVol.location) {
       setMensajeVol('Completa todos los campos obligatorios.');
       return;
     }
-    onCreateVoluntariado({
-      id: Date.now(),
-      name: formVol.name.trim(),
-      desc: formVol.desc.trim(),
-      impacto: formVol.desc.trim(),
-      actividades: [],
-      requisitos: [],
-      ongId: user.ongId,
-      ongName: miOng?.name || 'Mi ONG',
-      location: formVol.location.trim(),
-      category: formVol.category,
-      modalidad: formVol.modalidad,
-      cupos: parseInt(formVol.cupos),
-      cuposOcupados: 0,
-      duracion: formVol.duracion || 'Por definir',
-      fechaInicio: formVol.fechaInicio || new Date().toISOString().split('T')[0],
-      badge: 'Activo',
-      badgeClass: 'badge-active',
-      actualizacion: '',
-    });
-    setFormVol({ name: '', desc: '', category: 'Educación', modalidad: 'Presencial', cupos: '', duracion: '', fechaInicio: '', location: '' });
-    setMensajeVol('¡Voluntariado creado! Ya aparece en la sección de Voluntariado.');
-    setTimeout(() => setMensajeVol(''), 4000);
+    setCreandoVol(true);
+    try {
+      await onCreateVoluntariado({
+        name: formVol.name.trim(),
+        desc: formVol.desc.trim(),
+        category: formVol.category,
+        modalidad: formVol.modalidad,
+        cupos: parseInt(formVol.cupos, 10),
+        duracion: formVol.duracion || undefined,
+        fechaInicio: formVol.fechaInicio || undefined,
+        location: formVol.location.trim(),
+      });
+      setFormVol({ name: '', desc: '', category: 'Educación', modalidad: 'Presencial', cupos: '', duracion: '', fechaInicio: '', location: '' });
+      setMensajeVol('¡Voluntariado creado! Ya aparece en la sección de Voluntariado.');
+      setTimeout(() => setMensajeVol(''), 4000);
+    } catch (err) {
+      setMensajeVol(err.message || 'No se pudo crear el voluntariado.');
+    } finally {
+      setCreandoVol(false);
+    }
   }
 
   return (
@@ -134,7 +191,7 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
           ) : (
             <div className="admin-item-list">
               {misCampañas.map(c => {
-                const donantes = donacionesLog.filter(d => d.campañaId === c.id);
+                const donantes = donantesPorCampaña[c.id] || [];
                 const pct = Math.min(100, Math.round((c.actual / c.meta) * 100));
                 return (
                   <div key={c.id} className="admin-item-card">
@@ -156,10 +213,10 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
                     ) : (
                       <div className="admin-log-list">
                         {donantes.map((d, i) => (
-                          <div key={i} className="admin-log-row">
-                            <span className="admin-log-name">👤 {d.userName}</span>
-                            <span className="admin-log-amount">S/. {d.amount}</span>
-                            <span className="admin-log-date">{new Date(d.fecha).toLocaleDateString('es-PE')}</span>
+                          <div key={d.id ?? i} className="admin-log-row">
+                            <span className="admin-log-name">👤 {d.user?.fullName || d.user?.email || 'Usuario'}</span>
+                            <span className="admin-log-amount">S/. {d.monto}</span>
+                            <span className="admin-log-date">{new Date(d.createdAt).toLocaleDateString('es-PE')}</span>
                           </div>
                         ))}
                       </div>
@@ -186,7 +243,7 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
           ) : (
             <div className="admin-item-list">
               {misVoluntariados.map(v => {
-                const postulantes = postulacionesLog.filter(p => p.voluntariadoId === v.id);
+                const postulantes = postulantesPorVoluntariado[v.id] || [];
                 const cuposLibres = v.cupos - v.cuposOcupados;
                 return (
                   <div key={v.id} className="admin-item-card">
@@ -204,10 +261,10 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
                     ) : (
                       <div className="admin-log-list">
                         {postulantes.map((p, i) => (
-                          <div key={i} className="admin-log-row">
-                            <span className="admin-log-name">👤 {p.userName}</span>
-                            <span className="admin-log-email">{p.userEmail}</span>
-                            <span className="admin-log-date">{new Date(p.fecha).toLocaleDateString('es-PE')}</span>
+                          <div key={p.id ?? i} className="admin-log-row">
+                            <span className="admin-log-name">👤 {p.user?.fullName || 'Usuario'}</span>
+                            <span className="admin-log-email">{p.user?.email}</span>
+                            <span className="admin-log-date">{new Date(p.createdAt).toLocaleDateString('es-PE')}</span>
                           </div>
                         ))}
                       </div>
@@ -268,7 +325,9 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
               <input type="checkbox" checked={formCampaña.urgent} onChange={e => setFormCampaña({ ...formCampaña, urgent: e.target.checked })} />
               Marcar como urgente 🔥
             </label>
-            <button className="admin-submit-btn" onClick={handleCrearCampaña}>Crear campaña</button>
+            <button className="admin-submit-btn" onClick={handleCrearCampaña} disabled={creandoCampaña}>
+              {creandoCampaña ? 'Creando...' : 'Crear campaña'}
+            </button>
           </div>
         </div>
       )}
@@ -323,7 +382,9 @@ export default function AdminScreen({ user, campañas = [], voluntariados = [], 
               <label className="admin-label">Fecha de inicio</label>
               <input className="admin-input" type="date" value={formVol.fechaInicio} onChange={e => setFormVol({ ...formVol, fechaInicio: e.target.value })} />
             </div>
-            <button className="admin-submit-btn" onClick={handleCrearVoluntariado}>Crear voluntariado</button>
+            <button className="admin-submit-btn" onClick={handleCrearVoluntariado} disabled={creandoVol}>
+              {creandoVol ? 'Creando...' : 'Crear voluntariado'}
+            </button>
           </div>
         </div>
       )}

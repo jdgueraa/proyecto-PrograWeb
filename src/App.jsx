@@ -167,11 +167,19 @@ export default function App() {
         } />
     
         <Route path="/MiPerfil" element={authUser
+<<<<<<< HEAD
       ? <AppLayout user={authUser} onLogout={handleLogout}>
         {authUser?.role === 'ong'
           ? <ProfileOngScreen user={authUser} onUpdateUser={handleUpdateUser} />
           : <MyProfileScreen user={authUser} />}
         </AppLayout>: <Navigate to="/login" replace />} />
+=======
+        ? <AppLayout user={authUser} onLogout={handleLogout}>
+        <MyProfileScreen user={authUser} onUpdateUser={handleUpdateUser} />
+        </AppLayout>
+        : <Navigate to="/login" replace />
+        } />
+>>>>>>> main
 
         <Route path="/donaciones" element={
           <AppLayout user={authUser} onLogout={handleLogout}>
