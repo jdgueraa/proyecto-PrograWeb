@@ -7,9 +7,9 @@ export default function LoginScreen({ onLogin }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  function handleLogin() {
+  async function handleLogin() {
     setError('');
-    const errorMessage = onLogin(email, password);
+    const errorMessage = await onLogin(email, password);
     if (errorMessage) {
       setError(errorMessage);
       return;
