@@ -1,28 +1,23 @@
 import React, { useState } from 'react';
 
 export default function NewCredits({isOpen, onClose, onSave }) {
-    // Estado local para manejar el monto ingresado en el input
 const [monto, setMonto] = useState('');
 
-// Si el modal no está abierto, no renderizamos nada (retorna null)
 if (!isOpen) return null;
 
 const handleSave = () => {
-    // Validamos que se haya ingresado un número válido mayor a 0
     const montoNumerico = parseFloat(monto);
     if (!isNaN(montoNumerico) && montoNumerico > 0) {
         onSave(montoNumerico);
-        setMonto(''); // Limpiamos el input después de guardar
+        setMonto('');
     } else {
-        // Opcional: Aquí podrías manejar un estado de error visual
         console.error("Por favor ingresa un monto válido");
     }
 };
 
 return (
-    <>                        
+    <>
         <div className="credits-modal-overlay" onClick={onClose}>
-            {/* Usamos e.stopPropagation() para que al hacer clic dentro de la caja no se cierre el modal */}
             <div className="credits-modal-content" onClick={(e) => e.stopPropagation()}>
 
                 <div className="credits-modal-header">
@@ -51,7 +46,7 @@ return (
                     <p className="credits-tips-title">💡 Información de recarga:</p>
                     <ul className="credits-tips-list">
                         <li>El monto ingresado se sumará inmediatamente a tu saldo disponible.</li>
-                        <li>Puedes usar tus créditos para apoyar cualquier campaña de voluntariado.</li>                        
+                        <li>Puedes usar tus créditos para apoyar cualquier campaña de voluntariado.</li>
                     </ul>
                 </div>
 
@@ -62,7 +57,7 @@ return (
                     <button
                         className="credits-btn credits-btn-save"
                         onClick={handleSave}
-                        disabled={!monto || parseFloat(monto) <= 0} // Deshabilitar si está vacío o es 0
+                        disabled={!monto || parseFloat(monto) <= 0}
                     >
                         Confirmar Recarga
                     </button>

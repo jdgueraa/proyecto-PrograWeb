@@ -1,5 +1,3 @@
-// src/screens/LoginScreen.jsx
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,9 +7,6 @@ export default function LoginScreen({ onLogin }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  // onLogin (definido en App.jsx) ahora es async porque le pregunta al
-  // backend si el correo/contraseña son correctos, así que hay que
-  // esperar (await) su respuesta antes de decidir si hubo error.
   async function handleLogin() {
     setError('');
     const errorMessage = await onLogin(email, password);

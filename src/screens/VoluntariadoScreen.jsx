@@ -1,33 +1,10 @@
-// ─────────────────────────────────────────────────────────────
-// VoluntariadoScreen.jsx  —  Pantalla "Voluntariado"
-//
-// COMPONENTE USADO:
-//   • VoluntariadoDetailModal  →  popup con detalles del voluntariado
-//                                 y el botón para postularse
-//
-// PROPS QUE RECIBE (vienen de App.jsx):
-//   • voluntariados  →  lista de voluntariados desde el estado de App
-//   • user           →  usuario logueado (para saber si ya se postuló)
-//   • onPostular     →  función que registra la postulación
-//
-// DATOS (data.json):
-//   • categories     →  categorías para los botones de filtro
-//
-// CONECTADO AL BACKEND:
-// `voluntariados`, `user` y `onPostular` ya llegan aquí como props
-// desde App.jsx, y App.jsx ya los trae del backend. `categories` se
-// deja tal cual, es una lista fija que nunca cambia.
-// ─────────────────────────────────────────────────────────────
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { categories } from '../data.json';
 import VoluntariadoDetailModal from '../components/VoluntariadoDetailModal';
 
-// Opciones del filtro de modalidad
 const MODALIDADES = ['Todas', 'Presencial', 'Virtual', 'Híbrido'];
 
-// Íconos para cada modalidad
 const MODALIDAD_ICON = {
   Presencial: '📍',
   Virtual:    '💻',
@@ -37,20 +14,11 @@ const MODALIDAD_ICON = {
 export default function VoluntariadoScreen({ voluntariados = [], user, onPostular }) {
   const navigate = useNavigate();
 
-  // Texto libre del buscador
   const [query, setQuery] = useState('');
-
-  // Categoría activa en los filtros
   const [activeCategory, setActiveCategory] = useState('Todas');
-
-  // Modalidad activa: Todas / Presencial / Virtual / Híbrido
   const [activeModalidad, setActiveModalidad] = useState('Todas');
-
-  // Voluntariado seleccionado para abrir el modal de detalles
   const [selectedVol, setSelectedVol] = useState(null);
 
-  // ── Filtrado ──────────────────────────────────────────────
-  // Un voluntariado aparece si coincide con el texto, la categoría y la modalidad
   const filtered = voluntariados.filter(v => {
     const texto = query.toLowerCase();
 
@@ -65,14 +33,10 @@ export default function VoluntariadoScreen({ voluntariados = [], user, onPostula
     return coincideTexto && coincideCategoria && coincideModalidad;
   });
 
-  // Total de cupos libres sumando todos los voluntariados activos
   const totalCuposLibres = voluntariados
     .filter(v => v.badge === 'Activo')
     .reduce((suma, v) => suma + (v.cupos - v.cuposOcupados), 0);
 
-  // Verifica si el usuario ya se postuló a un voluntariado específico.
-  // Antes este dato se llamaba "voluntariadosPostulados" (en data.json).
-  // Ahora el backend lo manda con el nombre "postulaciones".
   function yaPostulado(vId) {
     return (user?.postulaciones || []).some(p => p.voluntariadoId === vId);
   }
@@ -80,14 +44,12 @@ export default function VoluntariadoScreen({ voluntariados = [], user, onPostula
   return (
     <div className="fade-in vol-wrapper">
 
-      {/* ── Cabecera: título, buscador y filtros ── */}
       <header className="donations-header">
         <h1 className="donations-title">Voluntariado</h1>
         <p className="donations-subtitle">
           Encuentra oportunidades para contribuir con tu tiempo y habilidades.
         </p>
 
-        {/* Buscador de texto libre */}
         <div className="search-box-container" style={{ maxWidth: '560px', margin: '0 auto 20px auto' }}>
           <span className="search-icon">🔍</span>
           <input
@@ -101,7 +63,6 @@ export default function VoluntariadoScreen({ voluntariados = [], user, onPostula
 
         <div className="donations-filters">
 
-          {/* Filtros por categoría (vienen del JSON) */}
           <div className="filter-tags">
             {categories.map(cat => (
               <button
@@ -114,7 +75,6 @@ export default function VoluntariadoScreen({ voluntariados = [], user, onPostula
             ))}
           </div>
 
-          {/* Filtros por modalidad */}
           <div className="donations-estado-tabs">
             {MODALIDADES.map(m => (
               <button
@@ -129,7 +89,6 @@ export default function VoluntariadoScreen({ voluntariados = [], user, onPostula
         </div>
       </header>
 
-      {/* ── Barra de estadísticas ── */}
       <div className="donations-stats-bar">
         <span>
           🤝 <strong>{totalCuposLibres}</strong> cupos disponibles en voluntariados activos
@@ -140,7 +99,6 @@ export default function VoluntariadoScreen({ voluntariados = [], user, onPostula
         </span>
       </div>
 
-      {/* ── Lista de voluntariados o mensaje vacío ── */}
       {filtered.length === 0 ? (
 
         <div className="donations-empty">
@@ -167,13 +125,11 @@ export default function VoluntariadoScreen({ voluntariados = [], user, onPostula
             const textoCupos = cuposLibres === 1 ? '1 cupo libre' : `${cuposLibres} cupos libres`;
 
             return (
-              // Click en la tarjeta abre el modal de detalles
               <div
                 key={v.id}
                 className={`donations-card card-clickable ${lleno ? 'donations-card--done' : ''}`}
                 onClick={() => setSelectedVol(v)}
               >
-                {/* Fila superior: badge, modalidad y categoría */}
                 <div className="donations-card-top">
                   <div className="donations-card-tags">
                     <span className={`campaign-badge ${v.badgeClass}`}>{v.badge}</span>
@@ -187,7 +143,6 @@ export default function VoluntariadoScreen({ voluntariados = [], user, onPostula
                 <h3 className="donations-card-name">{v.name}</h3>
                 <p className="donations-card-desc">{v.desc}</p>
 
-                {/* Enlace a la ONG — stopPropagation evita que también abra el modal */}
                 <button
                   className="donations-card-ong-link"
                   onClick={e => { e.stopPropagation(); navigate(`/perfil/${v.ongId}`); }}
@@ -195,13 +150,11 @@ export default function VoluntariadoScreen({ voluntariados = [], user, onPostula
                   {v.ongName} · 📍 {v.location}
                 </button>
 
-                {/* Fecha de inicio y duración */}
                 <div className="vol-meta-row">
                   <span className="vol-meta-item">📅 Inicio: <strong>{fechaFormateada}</strong></span>
                   <span className="vol-meta-item">⏱ Duración: <strong>{v.duracion}</strong></span>
                 </div>
 
-                {/* Barra de progreso de cupos ocupados */}
                 <div className="donations-progress">
                   <div className="donations-progress-bar-bg">
                     <div
@@ -215,7 +168,6 @@ export default function VoluntariadoScreen({ voluntariados = [], user, onPostula
                   </div>
                 </div>
 
-                {/* Botón que abre el modal (el flujo de postulación está dentro del modal) */}
                 <button
                   className={`donations-btn ${lleno || postulado ? 'donations-btn--done' : 'vol-btn-postular'}`}
                   disabled={lleno || postulado}
@@ -229,7 +181,6 @@ export default function VoluntariadoScreen({ voluntariados = [], user, onPostula
         </div>
       )}
 
-      {/* Modal de detalles — se muestra solo cuando hay un voluntariado seleccionado */}
       {selectedVol && (
         <VoluntariadoDetailModal
           key={selectedVol.id}

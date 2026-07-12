@@ -1,13 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// api.js — Ayudante central para hablar con el backend
-//
-// En vez de repetir fetch(...) + headers + manejo de errores en
-// cada pantalla, todas usan estas 3 funciones: api.get, api.post,
-// api.put. El token (el "pase" que entrega /api/auth/login) se
-// guarda en localStorage y se agrega solo, automáticamente, en
-// cada request que lo necesite.
-// ─────────────────────────────────────────────────────────────
-
 const BASE_URL = 'http://localhost:3000/api';
 
 async function request(path, options = {}) {

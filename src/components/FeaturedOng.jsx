@@ -1,4 +1,3 @@
-// src/components/FeaturedOng.jsx
 import React from 'react';
 
 function FeaturedOng({ ong, onNavigate }) {

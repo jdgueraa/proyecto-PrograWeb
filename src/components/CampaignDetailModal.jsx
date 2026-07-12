@@ -1,31 +1,6 @@
-// ─────────────────────────────────────────────────────────────
-// CampaignDetailModal.jsx  —  Modal de detalle de campaña + donación
-//
-// USADO EN:  DonationsScreen
-//
-// PROPS QUE RECIBE:
-//   • campaña   →  objeto de la campaña seleccionada
-//   • user      →  usuario logueado (para mostrar saldo y validar créditos)
-//   • onDonate  →  función de App.jsx que descuenta créditos y actualiza campaña
-//   • onClose   →  cierra el modal
-//
-// FLUJO DE DONACIÓN:
-//   1. Usuario presiona "Donar ahora"
-//   2. Aparece selector de monto (S/. 10, 25, 50, 100 o personalizado)
-//   3. Si tiene suficientes créditos → se confirma y se muestra mensaje de éxito
-//   4. Si no tiene créditos → se muestra error
-//
-// CONECTADO AL BACKEND:
-// `handleConfirmarDonacion` ahora espera (con "await") la respuesta
-// real del backend antes de mostrar el mensaje de éxito. Si el backend
-// rechaza la donación por algún motivo, se muestra un mensaje de error
-// en vez de "éxito" a la fuerza.
-// ─────────────────────────────────────────────────────────────
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// Montos de donación rápida que aparecen como botones
 const MONTOS_RAPIDOS = [10, 25, 50, 100];
 
 export default function CampaignDetailModal({ campaña, user, onDonate, onClose }) {
@@ -35,7 +10,6 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
   const [monto, setMonto] = useState('');
   const [montoPersonalizado, setMontoPersonalizado] = useState('');
   const [donationStatus, setDonationStatus] = useState(null);
-  // Guardamos el saldo ANTES de donar para mostrarlo correctamente en el mensaje de éxito
   const [saldoAntesDonacion, setSaldoAntesDonacion] = useState(0);
 
   useEffect(() => {
@@ -59,16 +33,10 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
     ? new Date(campaña.fechaFin).toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })
     : null;
 
-  // "async" quiere decir que esta función va a esperar una respuesta
-  // del backend antes de seguir. Usamos "await" para eso, y "try/catch"
-  // para saber si el backend aceptó la donación (try) o hubo algún
-  // problema al guardarla (catch).
   async function handleConfirmarDonacion() {
     if (!user) { setDonationStatus('noauth'); return; }
     if (!montoFinal || montoFinal <= 0) return;
     if ((user.creditos || 0) < montoFinal) { setDonationStatus('error'); return; }
-    // Guardamos el saldo actual ANTES de llamar onDonate,
-    // porque onDonate actualiza el usuario y React re-renderiza con el nuevo saldo
     setSaldoAntesDonacion(user.creditos || 0);
 
     try {
@@ -185,7 +153,6 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
           )}
         </div>
 
-        {/* ── Flujo de donación ── */}
         {!lograda && (
           <div className="donate-section">
             {donationStatus === 'noauth' && (
@@ -202,7 +169,6 @@ export default function CampaignDetailModal({ campaña, user, onDonate, onClose 
                 </p>
               </div>
             )}
-            {/* Mensaje si el backend no pudo procesar la donación */}
             {donationStatus === 'server-error' && (
               <div className="donate-error-alert">
                 No se pudo procesar tu donación. Intenta de nuevo en unos segundos.

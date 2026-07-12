@@ -1,4 +1,3 @@
-// src/components/CampaignCard.jsx
 import React from 'react';
 
 export default function CampaignCard({ campaña, onAction, onCardClick }) {

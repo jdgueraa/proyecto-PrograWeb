@@ -1,51 +1,18 @@
-// ─────────────────────────────────────────────────────────────
-// DonationsScreen.jsx  —  Pantalla "Donaciones"
-//
-// COMPONENTE USADO:
-//   • CampaignDetailModal  →  popup con detalles de la campaña
-//                             y el flujo para realizar una donación
-//
-// PROPS QUE RECIBE (vienen de App.jsx):
-//   • campañas   →  lista de campañas desde el estado de App
-//   • user       →  usuario logueado (para mostrar saldo y donar)
-//   • onDonate   →  función que descuenta créditos y actualiza la campaña
-//
-// DATOS (data.json):
-//   • categories →  categorías para los botones de filtro
-//
-// CONECTADO AL BACKEND:
-// `campañas`, `user` y `onDonate` ya llegan aquí como props desde
-// App.jsx, y App.jsx ya los trae del backend (GET /api/campanas y
-// POST /api/donaciones). Por eso esta pantalla no necesitó ningún
-// cambio para funcionar con datos reales. `categories` sí se deja tal
-// cual: es una lista fija que nunca cambia, no hace falta pedirla al servidor.
-// ─────────────────────────────────────────────────────────────
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { categories } from '../data.json';
 import CampaignDetailModal from '../components/CampaignDetailModal';
 
-// Opciones del filtro de estado
 const ESTADOS = ['Todas', 'Activas', 'Logradas'];
 
 export default function DonationsScreen({ campañas = [], user, onDonate }) {
   const navigate = useNavigate();
 
-  // Texto libre del buscador
   const [query, setQuery] = useState('');
-
-  // Categoría activa en los filtros (Medio Ambiente, Educación, etc.)
   const [activeCategory, setActiveCategory] = useState('Todas');
-
-  // Estado activo: Todas / Activas / Logradas
   const [activeEstado, setActiveEstado] = useState('Todas');
-
-  // Campaña seleccionada para abrir el modal de detalles
   const [selectedCampaña, setSelectedCampaña] = useState(null);
 
-  // ── Filtrado ──────────────────────────────────────────────
-  // Una campaña aparece si coincide con el texto, la categoría y el estado
   const filtered = campañas.filter(c => {
     const texto = query.toLowerCase();
 
@@ -64,7 +31,6 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
     return coincideTexto && coincideCategoria && coincideEstado;
   });
 
-  // Total recaudado sumando solo las campañas activas
   const totalRecaudado = campañas
     .filter(c => c.badge === 'Activa')
     .reduce((suma, c) => suma + c.actual, 0);
@@ -72,21 +38,18 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
   return (
     <div className="fade-in donations-wrapper">
 
-      {/* ── Cabecera: título, saldo, buscador y filtros ── */}
       <header className="donations-header">
         <h1 className="donations-title">Donaciones</h1>
         <p className="donations-subtitle">
           Elige una campaña y contribuye directamente a quienes más lo necesitan.
         </p>
 
-        {/* Muestra el saldo solo si el usuario es persona (no ONG) */}
         {user && user.role !== 'ong' && (
           <div className="donations-saldo-badge">
             💰 Tu saldo: S/. {(user.creditos || 0).toLocaleString()}
           </div>
         )}
 
-        {/* Buscador de texto libre */}
         <div className="search-box-container" style={{ maxWidth: '560px', margin: '0 auto 20px auto' }}>
           <span className="search-icon">🔍</span>
           <input
@@ -100,7 +63,6 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
 
         <div className="donations-filters">
 
-          {/* Filtros por categoría (vienen del JSON) */}
           <div className="filter-tags">
             {categories.map(cat => (
               <button
@@ -113,7 +75,6 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
             ))}
           </div>
 
-          {/* Filtros por estado: Todas / Activas / Logradas */}
           <div className="donations-estado-tabs">
             {ESTADOS.map(estado => (
               <button
@@ -128,7 +89,6 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
         </div>
       </header>
 
-      {/* ── Barra de estadísticas ── */}
       <div className="donations-stats-bar">
         <span>
           💰 <strong>S/. {totalRecaudado.toLocaleString()}</strong> recaudados en campañas activas
@@ -139,7 +99,6 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
         </span>
       </div>
 
-      {/* ── Lista de campañas o mensaje vacío ── */}
       {filtered.length === 0 ? (
 
         <div className="donations-empty">
@@ -156,18 +115,15 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
 
         <div className="donations-grid">
           {filtered.map(c => {
-            // Porcentaje recaudado respecto a la meta (máximo 100%)
             const pct = Math.min(100, Math.round((c.actual / c.meta) * 100));
             const lograda = c.badge === '¡Lograda!';
 
             return (
-              // Click en la tarjeta abre el modal de detalles
               <div
                 key={c.id}
                 className={`donations-card card-clickable ${lograda ? 'donations-card--done' : ''}`}
                 onClick={() => setSelectedCampaña(c)}
               >
-                {/* Fila superior: badge de estado, urgencia y categoría */}
                 <div className="donations-card-top">
                   <div className="donations-card-tags">
                     <span className={`campaign-badge ${c.badgeClass}`}>{c.badge}</span>
@@ -179,7 +135,6 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
                 <h3 className="donations-card-name">{c.name}</h3>
                 <p className="donations-card-desc">{c.desc}</p>
 
-                {/* Enlace a la ONG — stopPropagation evita que también abra el modal */}
                 <button
                   className="donations-card-ong-link"
                   onClick={e => { e.stopPropagation(); navigate(`/perfil/${c.ongId}`); }}
@@ -187,7 +142,6 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
                   {c.ongName} · 📍 {c.location}
                 </button>
 
-                {/* Barra de progreso de recaudación */}
                 <div className="donations-progress">
                   <div className="donations-progress-bar-bg">
                     <div
@@ -204,7 +158,6 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
                   </div>
                 </div>
 
-                {/* Botón que abre el modal (el flujo de donación está dentro del modal) */}
                 <button
                   className={`donations-btn ${lograda ? 'donations-btn--done' : ''}`}
                   disabled={lograda}
@@ -218,7 +171,6 @@ export default function DonationsScreen({ campañas = [], user, onDonate }) {
         </div>
       )}
 
-      {/* Modal de detalles — se muestra solo cuando hay una campaña seleccionada */}
       {selectedCampaña && (
         <CampaignDetailModal
           key={selectedCampaña.id}

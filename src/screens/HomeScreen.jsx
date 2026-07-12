@@ -1,19 +1,3 @@
-// src/screens/HomeScreen.jsx
-//
-// TODO(backend): esta pantalla importa `ongs, campañas` fijos desde
-// data.json (usados abajo en `ongDestacada` y `campañasUrgentes`). Como
-// App.jsx no le pasa `campañas`/`ongs` como props a esta pantalla
-// (mirar la <Route path="/home" ...> en App.jsx), hay dos formas de
-// conectarla:
-//   a) Más simple: que App.jsx le pase `campañas` como prop (ya la tiene
-//      cargada) y aquí agregar `const [ongs, setOngs] = useState([]);`
-//      con un `useEffect(() => { api.get('/ongs').then(setOngs); }, []);`
-//      para la ONG destacada.
-//   b) O bien, esta pantalla misma pide ambas cosas con `api.get('/campanas')`
-//      y `api.get('/ongs')` en su propio useEffect, sin depender de App.jsx.
-// El resto de la lógica (`.find(o => o.featured === true)`,
-// `.filter(c => c.urgent === true)`) no cambia, ya funciona igual sobre
-// cualquier arreglo real que venga del backend.
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,7 +18,7 @@ export default function HomeScreen({ user, onDonate }) {
   async function handleLocalDonate(campañaId, amount) {
     await onDonate(campañaId, amount);
 
-    setCampanasList(prevList => 
+    setCampanasList(prevList =>
       prevList.map(c => {
         if (c.id === campañaId) {
           const nuevoMonto = c.actual + amount;
@@ -66,7 +50,6 @@ export default function HomeScreen({ user, onDonate }) {
   return (
     <div className="fade-in home-screen-wrapper">
 
-      {/* 1. SECTION PRINCIPAL */}
       <div className="home-principal">
         <h1 className="home-screen-principal-title">Transforma realidades en el Perú</h1>
         <p className="home-screen-principal-subtitle">
@@ -78,7 +61,6 @@ export default function HomeScreen({ user, onDonate }) {
       </div>
       <br></br>
 
-      {/* 2. IMPACTO EN CIFRAS */}
       <div className="home-screen-stats-grid">
         <div className="home-screen-stat-card">
           <span>🏢</span>
@@ -97,7 +79,6 @@ export default function HomeScreen({ user, onDonate }) {
         </div>
       </div>
 
-      {/* 3. SECCIÓN: CAMPAÑAS URGENTES */}
       <div style={{ marginBottom: '40px' }}>
         <div className="home-screen-section-header">
           <h2 className="home-screen-section-title">🔥 Campañas Urgentes</h2>
@@ -116,7 +97,6 @@ export default function HomeScreen({ user, onDonate }) {
         </div>
       </div>
 
-      {/* 4. SECCIÓN: ONG DESTACADA DE LA SEMANA */}
       <FeaturedOng
         ong={ongDestacada}
         onNavigate={() => navigate(`/perfil/${ongDestacada?.id || 1}`)}

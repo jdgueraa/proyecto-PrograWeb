@@ -1,28 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// VoluntariadoDetailModal.jsx  —  Modal de detalle de voluntariado + postulación
-//
-// USADO EN:  VoluntariadoScreen
-//
-// PROPS QUE RECIBE:
-//   • voluntariado  →  objeto del voluntariado seleccionado
-//   • user          →  usuario logueado (para verificar si ya se postuló)
-//   • onPostular    →  función de App.jsx que registra la postulación
-//   • onClose       →  cierra el modal
-//
-// FLUJO DE POSTULACIÓN:
-//   1. Usuario presiona "Postularme a este voluntariado"
-//   2. Aparece confirmación "¿Confirmar tu postulación?"
-//   3. Si confirma → se registra la postulación y aparece mensaje de éxito
-//   4. Si ya estaba postulado → muestra directamente "¡Postulación enviada!"
-//
-// CONECTADO AL BACKEND:
-// `yaPostulado` ahora se fija en `user.postulaciones` (antes se
-// llamaba `voluntariadosPostulados` en data.json). Y `handlePostularConfirm`
-// ahora espera (con "await") la respuesta real del backend antes de
-// mostrar el mensaje de éxito, por si el backend la rechaza (por
-// ejemplo porque alguien más se postuló justo antes y ya no hay cupos).
-// ─────────────────────────────────────────────────────────────
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -45,18 +20,12 @@ export default function VoluntariadoDetailModal({ voluntariado: v, user, onPostu
   const cuposLibres = v.cupos - v.cuposOcupados;
   const pctOcupado  = Math.round((v.cuposOcupados / v.cupos) * 100);
   const lleno       = v.badge === 'Lleno' || cuposLibres <= 0;
-  // Antes este dato se llamaba "voluntariadosPostulados". El backend
-  // lo manda ahora con el nombre "postulaciones".
   const yaPostulado = user?.postulaciones?.some(p => p.voluntariadoId === v.id) || false;
 
   const fechaInicio = new Date(v.fechaInicio).toLocaleDateString('es-PE', {
     day: 'numeric', month: 'long', year: 'numeric',
   });
 
-  // "async" quiere decir que esta función va a esperar una respuesta
-  // del backend antes de seguir. Usamos "await" para eso, y "try/catch"
-  // para saber si el backend dijo que sí (try) o si hubo algún problema
-  // (catch), por ejemplo que ya no quedan cupos.
   async function handlePostularConfirm() {
     if (!user) { setPostulacionStatus('noauth'); return; }
 
@@ -94,8 +63,6 @@ export default function VoluntariadoDetailModal({ voluntariado: v, user, onPostu
         </div>
       );
     }
-    // Mensaje que aparece si el backend no pudo registrar la postulación
-    // (por ejemplo, alguien más ocupó el último cupo justo antes).
     if (postulacionStatus === 'error') {
       return (
         <div className="postular-noauth-alert">

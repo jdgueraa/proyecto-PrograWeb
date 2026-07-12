@@ -1,17 +1,3 @@
-// CONECTADO AL BACKEND:
-// Esta pantalla es el perfil público de una ONG (se abre cuando haces
-// clic en "Ver Perfil" desde Buscar, o en el nombre de la ONG desde una
-// tarjeta de Donaciones/Voluntariado).
-//
-// Antes buscaba la ONG y sus campañas/voluntariados en el archivo fijo
-// data.json. Ahora:
-//   - La ONG puntual se pide al backend con su id (GET /api/ongs/:id).
-//   - Las campañas y voluntariados de esa ONG llegan como props desde
-//     App.jsx (que ya los trae del backend), y aquí solo se filtran por
-//     ongId, igual que antes.
-//   - El botón de "Seguir" ya no guarda nada dentro del usuario a mano:
-//     llama al endpoint POST /api/ongs/:id/follow, que es el que de
-//     verdad guarda el seguimiento en la base de datos.
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api';
@@ -27,21 +13,14 @@ export default function ProfileScreen({ user, campañas = [], voluntariados = []
   const navigate  = useNavigate();
   const { id }    = useParams();
 
-  // Aquí guardamos la ONG que nos responda el backend. Arranca en
-  // null porque todavía no hemos recibido la respuesta.
   const [ong, setOng] = useState(null);
 
-  // Le pedimos al backend los datos de esta ONG en particular. El "id"
-  // va dentro de la lista de dependencias ([id]) para que, si el
-  // usuario navega de un perfil de ONG a otro, se vuelva a pedir.
   useEffect(() => {
     api.get('/ongs/' + id).then(function (respuesta) {
       setOng(respuesta);
     });
   }, [id]);
 
-  // Mientras todavía no llega la respuesta del backend, mostramos un
-  // mensaje simple en vez de intentar leer datos que no existen aún.
   if (!ong) {
     return <div className="fade-in">Cargando perfil de la ONG...</div>;
   }
@@ -49,24 +28,14 @@ export default function ProfileScreen({ user, campañas = [], voluntariados = []
   const ongCampañas      = campañas.filter(c => c.ongId === ong.id);
   const ongVoluntariados = voluntariados.filter(v => v.ongId === ong.id);
 
-  // Verifica si el usuario ya sigue esta ONG. Antes este dato vivía en
-  // "user.ongsSeguidasIds" (solo ids). Ahora GET /api/me manda
-  // "user.ongsSeguidas", con las ONGs completas que sigue el usuario.
   const seguido = (user?.ongsSeguidas || []).some(o => o.id === ong.id);
 
-  // Avisa al backend que el usuario quiere seguir o dejar de seguir
-  // esta ONG. Es "async" porque espera la respuesta del servidor antes
-  // de actualizar la pantalla.
   async function toggleSeguir() {
     if (!user) return;
 
     try {
-      // Esto guarda el cambio de verdad en la base de datos
       await api.post('/ongs/' + ong.id + '/follow');
 
-      // Volvemos a pedir la ONG (para que el contador de seguidores
-      // se actualice) y avisamos a App.jsx que refresque al usuario
-      // (para que "seguido" quede bien la próxima vez que se calcule).
       const ongActualizada = await api.get('/ongs/' + ong.id);
       setOng(ongActualizada);
       if (onFollowChange) {
@@ -82,7 +51,6 @@ export default function ProfileScreen({ user, campañas = [], voluntariados = []
 
       <button className="back-btn" onClick={() => navigate(-1)}>⬅ Volver</button>
 
-      {/* ── Banner ── */}
       <div
         className="ong-prof-banner"
         style={
@@ -96,7 +64,6 @@ export default function ProfileScreen({ user, campañas = [], voluntariados = []
         </div>
       </div>
 
-      {/* ── Header: nombre + seguir ── */}
       <div className="ong-prof-header">
         <div>
           <h1 className="ong-prof-name">{ong.name}</h1>
@@ -116,11 +83,8 @@ export default function ProfileScreen({ user, campañas = [], voluntariados = []
         </button>
       </div>
 
-      {/* ── Stats ── */}
       <div className="ong-prof-stats">
         <div className="ong-prof-stat">
-          {/* El contador de seguidores ya viene correcto desde el
-              backend (ya no hace falta sumarle +1 a mano). */}
           <span className="ong-prof-stat-num">{ong.seguidores.toLocaleString()}</span>
           <span className="ong-prof-stat-label">Seguidores</span>
         </div>
@@ -136,7 +100,6 @@ export default function ProfileScreen({ user, campañas = [], voluntariados = []
         </div>
       </div>
 
-      {/* ── Tabs ── */}
       <div className="dashboard-tabs ong-prof-tabs">
         <button
           className={`tab-btn ${activeTab === 'campañas' ? 'active' : ''}`}
@@ -158,7 +121,6 @@ export default function ProfileScreen({ user, campañas = [], voluntariados = []
         </button>
       </div>
 
-      {/* ── Tab: Campañas ── */}
       {activeTab === 'campañas' && (
         ongCampañas.length === 0 ? (
           <div className="ong-prof-empty">
@@ -201,7 +163,6 @@ export default function ProfileScreen({ user, campañas = [], voluntariados = []
         )
       )}
 
-      {/* ── Tab: Voluntariados ── */}
       {activeTab === 'voluntariados' && (
         ongVoluntariados.length === 0 ? (
           <div className="ong-prof-empty">
@@ -240,7 +201,6 @@ export default function ProfileScreen({ user, campañas = [], voluntariados = []
         )
       )}
 
-      {/* ── Tab: Sobre nosotros ── */}
       {activeTab === 'sobre' && (
         <div className="ong-prof-about">
 
