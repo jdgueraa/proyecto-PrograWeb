@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function NewCredits({user, isOpen, onClose }) {
+export default function NewCredits({isOpen, onClose, onSave }) {
     // Estado local para manejar el monto ingresado en el input
 const [monto, setMonto] = useState('');
 
@@ -11,7 +11,7 @@ const handleSave = () => {
     // Validamos que se haya ingresado un número válido mayor a 0
     const montoNumerico = parseFloat(monto);
     if (!isNaN(montoNumerico) && montoNumerico > 0) {
-        onAddCredits(montoNumerico);
+        onSave(montoNumerico);
         setMonto(''); // Limpiamos el input después de guardar
     } else {
         // Opcional: Aquí podrías manejar un estado de error visual

@@ -28,6 +28,10 @@ export default function MyProfileScreen({ user, onUpdateUser }) {
         onUpdateUser({ photoUrl: url });
     }
 
+    function saveNewCredits(credits) {        
+        onUpdateUser({ creditos: user.creditos + credits });
+    }
+
     if (!user) {
         return <Navigate to="/login" replace />;
     }
@@ -138,10 +142,13 @@ export default function MyProfileScreen({ user, onUpdateUser }) {
                 }}
             />
 
-            <NewCredits
-                user={user}
+            <NewCredits                
                 isOpen={isCreditsModalOpen} 
-                onClose={() => setIsCreditsModalOpen(false)}                
+                onClose={() => setIsCreditsModalOpen(false)} 
+                onSave={(credits) => {
+                    saveNewCredits(credits);
+                    setIsCreditsModalOpen(false);
+                }}               
             />
 
             {/* uso de useState */}
