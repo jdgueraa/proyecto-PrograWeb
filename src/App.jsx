@@ -101,6 +101,7 @@ export default function App() {
   async function handleUpdateUser(camposActualizados) {
     const user = await api.put('/me', camposActualizados);
     setAuthUser(user);
+    await refreshUser();
     return user;
   }
 

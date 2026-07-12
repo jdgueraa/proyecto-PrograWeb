@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import ProfilePhotoModal from '../components/ProfilePhotoModal.jsx';
 import SeguimientoScreen from '../components/SeguimientoScreen.jsx';
+import NewCredits from '../components/NewCredits.jsx';
 
 // user y onUpdateUser vienen de App.jsx:
 //   • user           → el usuario logueado, ya resuelto por GET /api/me
@@ -16,6 +17,7 @@ export default function MyProfileScreen({ user, onUpdateUser }) {
     // La foto ahora vive en la base de datos (user.photoUrl), no en
     // localStorage — si el usuario nunca subió una, arranca vacía.
     const [fotoUrl, setFotoUrl] = useState(user?.photoUrl || '');
+    const [isCreditsModalOpen, setIsCreditsModalOpen] = useState(false);
     const [showPhotoModal, setShowPhotoModal] = useState(false);
     const [photoInput, setPhotoInput] = useState('');
 
@@ -24,6 +26,10 @@ export default function MyProfileScreen({ user, onUpdateUser }) {
     function saveProfilePhoto(url) {
         setFotoUrl(url);
         onUpdateUser({ photoUrl: url });
+    }
+
+    function saveNewCredits(credits) {        
+        onUpdateUser({ creditos: user.creditos + credits });
     }
 
     if (!user) {
@@ -93,6 +99,36 @@ export default function MyProfileScreen({ user, onUpdateUser }) {
                             <p>"{usuarioLogueado.biografia}"</p>
                         ) : null}
                     </div>
+
+                    { activeTab !== 'seguimiento' ? (
+                        <div className="tarjeta-creditos">
+                            <p className="tarjeta-creditos-titulo">
+                                Mis Créditos Disponibles
+                            </p>
+                            <h2 className="tarjeta-creditos-monto">
+                                S/. {user.creditos}
+                            </h2>
+
+                            {/* El botón posicionado */}
+                            <button 
+                                className="btn-aumentar-creditos"
+                                onClick={() => {
+                                setIsCreditsModalOpen(true);
+                                }}
+                                title="Aumentar créditos"
+                            >
+                                +
+                            </button>
+                        </div> 
+                    ) : (
+                        <button 
+                            className="btn-solo-aumentar"
+                            onClick={() => setIsCreditsModalOpen(true)}
+                            >
+                            Aumentar créditos
+                        </button>
+                        ) 
+                    }
                 </div>
             </div>
 
@@ -104,6 +140,15 @@ export default function MyProfileScreen({ user, onUpdateUser }) {
                     saveProfilePhoto(url);
                     setShowPhotoModal(false);
                 }}
+            />
+
+            <NewCredits                
+                isOpen={isCreditsModalOpen} 
+                onClose={() => setIsCreditsModalOpen(false)} 
+                onSave={(credits) => {
+                    saveNewCredits(credits);
+                    setIsCreditsModalOpen(false);
+                }}               
             />
 
             {/* uso de useState */}

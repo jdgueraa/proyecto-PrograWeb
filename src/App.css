@@ -616,9 +616,9 @@ body {
 
 /* ─── MI PERFIL ─── */
 .profile-dashboard h1{
-  font-family: var(--font-serif);
-  font-size: 65px;
-  font-weight: 400;
+  font-family: var(--font-sans);
+  font-size: 60px;
+  font-weight: 700;
   color: var(--green-deep);
   margin-bottom: 50px;
 }
@@ -1912,6 +1912,7 @@ body {
 }
 
 .color-verde { background-color: #2ecc71; }
+.color-azul { background-color: #3498db; }
 .color-rojo { background-color: #e74c3c; }
 
 .bar-percentage {
@@ -2597,4 +2598,272 @@ body {
   padding: 11px 18px; background: #fff; color: #6b7280;
   border: 1px solid #e5e7eb; border-radius: 8px;
   font-family: var(--font-sans); font-weight: 600; font-size: 14px; cursor: pointer;
+}
+
+
+.tarjeta-creditos {
+  background-color: #f0fdf4; 
+  border-radius: 12px;
+  padding: 10px 20px ; /* Ajusté un poco el padding para que no se vea tan alta */
+  margin: 20px 0px 5px;
+  border: 1px solid #e5e7eb;
+  text-align: center;
+  position: relative; 
+  
+  /* LA MAGIA PARA MOVERLO A LA DERECHA */
+  margin-left: auto; 
+}
+
+.tarjeta-creditos-titulo {
+  color: #9ca3af;
+  font-size: 12px;
+  margin-top: 5px;
+  margin-bottom: 4px;
+}
+
+.tarjeta-creditos-monto {
+  color: #16a34a;
+  font-size: 24px;
+  margin: 0;
+  font-weight: bold;
+}
+
+/* --- Estilos para el botón flotante --- */
+
+.btn-aumentar-creditos {
+  position: absolute; 
+  bottom: 8px; /* Ajustado para pegarlo un poco más a la esquina */
+  right: 8px;  
+  
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px; /* Un poco más pequeño para que encaje mejor */
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-aumentar-creditos:hover {
+  background-color: #15803d;
+  transform: scale(1.1);
+}
+
+.btn-solo-aumentar {
+  /* LA MAGIA PARA MOVERLO A LA DERECHA CUANDO LA TARJETA NO ESTÁ */
+  margin-left: auto; 
+
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  margin-top: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-solo-aumentar:hover {
+  background-color: #15803d;
+  transform: translateY(-2px); /* Pequeño efecto de elevación al pasar el mouse */
+}
+
+/* Fondo oscuro semi-transparente */
+.credits-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Asegura que esté por encima de la app */
+  backdrop-filter: blur(2px); /* Pequeño desenfoque moderno */
+}
+
+/* Contenedor principal de la tarjeta blanca */
+.credits-modal-content {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUpFade 0.3s ease-out forwards;
+}
+
+/* Animación suave de entrada */
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cabecera del modal */
+.credits-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.credits-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #1f2937;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.credits-modal-subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Zona del Input */
+.credits-input-group {
+  margin-bottom: 24px;
+}
+
+.credits-input-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #4b5563;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.credits-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.credits-currency-symbol {
+  position: absolute;
+  left: 16px;
+  color: #9ca3af;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.credits-modal-input {
+  width: 100%;
+  padding: 14px 14px 14px 45px; /* Padding izquierdo más grande para el símbolo S/. */
+  background-color: #374151; /* El fondo oscuro que usaste en tu referencia */
+  color: white;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.credits-modal-input:focus {
+  outline: none;
+  border-color: #16a34a; /* Borde verde al hacer click */
+}
+
+/* Ocultar las flechas del input number */
+.credits-modal-input::-webkit-outer-spin-button,
+.credits-modal-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Caja de Consejos (Verde claro) */
+.credits-tips-box {
+  background-color: #f0fdf4;
+  border: 1px solid #dcfce7;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 28px;
+}
+
+.credits-tips-title {
+  color: #15803d;
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 0;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.credits-tips-list {
+  margin: 0;
+  padding-left: 20px;
+  color: #166534;
+  font-size: 13px;
+  line-height: 1.5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.credits-tips-list li {
+  margin-bottom: 6px;
+}
+
+/* Botones de Acción */
+.credits-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.credits-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.credits-btn-cancel {
+  background-color: white;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+}
+
+.credits-btn-cancel:hover {
+  background-color: #f3f4f6;
+}
+
+.credits-btn-save {
+  background-color: #16a34a;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2);
+}
+
+.credits-btn-save:hover {
+  background-color: #15803d;
+  transform: translateY(-1px);
+}
+
+.credits-btn-save:disabled {
+  background-color: #86efac;
+  cursor: not-allowed;
+  transform: none;
 }
