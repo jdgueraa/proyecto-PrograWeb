@@ -5,6 +5,7 @@ import SeguimientoScreen from '../components/SeguimientoScreen.jsx';
 import NewCredits from '../components/NewCredits.jsx';
 import { api } from '../api';
 
+
 export default function MyProfileScreen({ user, onUpdateUser, onCreditsChange }) {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('actividad');
@@ -14,9 +15,9 @@ export default function MyProfileScreen({ user, onUpdateUser, onCreditsChange })
     const [showPhotoModal, setShowPhotoModal] = useState(false);
     const [photoInput, setPhotoInput] = useState('');
 
-    function saveProfilePhoto(url) {
+    function saveProfilePhoto(na,bio,url) {
         setFotoUrl(url);
-        onUpdateUser({ photoUrl: url });
+        onUpdateUser({ fullName: na, biografia: bio, photoUrl: url });
     }
 
     async function saveNewCredits(credits) {
@@ -117,11 +118,12 @@ export default function MyProfileScreen({ user, onUpdateUser, onCreditsChange })
             </div>
 
             <ProfilePhotoModal
+                user={user}
                 isOpen={showPhotoModal}
                 initialUrl={photoInput}
                 onClose={() => setShowPhotoModal(false)}
-                onSave={(url) => {
-                    saveProfilePhoto(url);
+                onSave={(na, bio, url) => {
+                    saveProfilePhoto(na,bio,url);
                     setShowPhotoModal(false);
                 }}
             />

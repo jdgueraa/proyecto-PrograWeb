@@ -47,6 +47,7 @@ return (
                     <ul className="credits-tips-list">
                         <li>El monto ingresado se sumará inmediatamente a tu saldo disponible.</li>
                         <li>Puedes usar tus créditos para apoyar cualquier campaña de voluntariado.</li>
+                        <li>El limite por cada recarga de dinero es de S/. 500.</li>
                     </ul>
                 </div>
 
@@ -57,7 +58,7 @@ return (
                     <button
                         className="credits-btn credits-btn-save"
                         onClick={handleSave}
-                        disabled={!monto || parseFloat(monto) <= 0}
+                        disabled={!monto || parseFloat(monto) <= 0 || parseFloat(monto) >500}
                     >
                         Confirmar Recarga
                     </button>

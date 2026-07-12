@@ -1,24 +1,28 @@
 import React, { useEffect, useState } from 'react';
 
-export default function ProfilePhotoModal({ isOpen, initialUrl = '', onClose, onSave }) {
+export default function ProfilePhotoModal({ user, isOpen, initialUrl = '', onClose, onSave }) {
   const [url, setUrl] = useState(initialUrl);
+  const [name, setName] = useState(user.fullName);
+  const [bio, setBio] = useState(user.biografia);
   const [valid, setValid] = useState(true);
 
   useEffect(() => {
-    setUrl(initialUrl || '');
+    setUrl(initialUrl || '');    
     setValid(true);
   }, [initialUrl, isOpen]);
 
   if (!isOpen) return null;
 
   function handleSave() {
+    const nombre = (name || '').trim();
+    const descrip = (bio || '').trim();
     const trimmed = (url || '').trim();
     if (!trimmed) return;
     if (!/^https?:\/\//i.test(trimmed)) {
       setValid(false);
       return;
     }
-    onSave(trimmed);
+    onSave(nombre,descrip,trimmed);
     onClose();
   }
 
@@ -33,8 +37,34 @@ export default function ProfilePhotoModal({ isOpen, initialUrl = '', onClose, on
         </button>
 
         <div className="photo-modal-header">
-          <h2>📷 Cambiar foto de perfil</h2>
-          <p>Sube una nueva imagen para tu perfil</p>
+          <h2> 📝 Configurar perfil</h2>
+          <p>Puedes actualizar diferentes secciones de tu perfil</p>
+        </div>
+
+        <div className="photo-modal-form-group">
+          <label className="photo-modal-label">
+            Nombre de perfil
+          </label>
+          <input
+            className={`photo-modal-input ${!valid ? 'invalid' : ''}`}
+            type="text"
+            placeholder="Dale un nuevo nombre a tu perfil"
+            value={name}
+            onChange={e => { setName(e.target.value); setValid(true); }}
+          />
+        </div>
+
+        <div className="photo-modal-form-group">
+          <label className="photo-modal-label">
+            Descripción
+          </label>
+          <input
+            className={`photo-modal-input ${!valid ? 'invalid' : ''}`}
+            type="text"
+            placeholder="Expresa lo que quieras"
+            value={bio}
+            onChange={e => { setBio(e.target.value); setValid(true); }}
+          />
         </div>
 
         <div className="photo-modal-form-group">
