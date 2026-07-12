@@ -1,36 +1,12 @@
-// TODO(backend): esta pantalla busca la ONG en data.json y guarda los
-// cambios metidos dentro de `user.ongProfile` (un campo que solo existe
-// en memoria). Para conectarla:
-//   1. Quitar el import de `ongs` desde data.json. GET /api/me YA incluye
-//      la ONG completa del usuario logueado en `user.ong` (ver
-//      users.controller.js del backend) — usar `ongBase = user?.ong`
-//      directo, sin buscar en ningún arreglo.
-//   2. El campo `user.ongProfile` no existe en el backend: los datos
-//      reales de la ONG viven en la tabla Ongs, no en el usuario. Cambiar
-//      `getDatosActuales()` para leer directo de `user?.ong` (sin el
-//      `.ongProfile`).
-//   3. `guardarPerfil()` ya no debe llamar a `onUpdateUser` con un
-//      `ongProfile` inventado. Debe llamar:
-//      `await api.put(`/ongs/${user.ong.id}`, ongForm)` (los campos que
-//      acepta el backend son: name, location, desc, mision, emoji, color,
-//      email, telefono, web — deben coincidir con los names de los inputs
-//      de abajo). Después de guardar, refrescar el usuario (por ejemplo
-//      con una prop `onProfileSaved` que App.jsx resuelva llamando a su
-//      `refreshUser()`).
-//   4. `guardarFoto()` sí puede seguir usando `onUpdateUser({ photoUrl: url })`
-//      tal cual, porque la foto del usuario (no de la ONG) sí vive en la
-//      tabla Users y ya la maneja PUT /api/me.
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { ongs } from '../data.json';
 import ProfilePhotoModal from '../components/ProfilePhotoModal.jsx';
 
 export default function ProfileOngScreen({ user, onUpdateUser }) {
-
-  // Buscamos la ONG base en el JSON usando el ongId del usuario logueado
+  
   const ongBase = ongs.find(ong => ong.id === user?.ongId);
-
-  // Función auxiliar para obtener los datos más recientes del perfil
+  
   function getDatosActuales() {
     return {
       name:     user?.ongProfile?.name     || ongBase?.name     || '',
@@ -44,41 +20,32 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
       color:    user?.ongProfile?.color    || ongBase?.color    || '#d4f5e9',
     };
   }
-
-  // Estado del formulario de edición
+  
   const [ongForm, setOngForm] = useState(getDatosActuales);
-
-  // Controla si estamos en modo vista (false) o modo edición (true)
+  
   const [editando, setEditando] = useState(false);
-
-  // URL de la foto/logo de la ONG
+  
   const [fotoUrl, setFotoUrl] = useState(user?.photoUrl || '');
-
-  // Controla el modal para cambiar la foto
+  
   const [showPhotoModal, setShowPhotoModal] = useState(false);
-
-  // Si no hay usuario logueado, redirigir al login
+  
   if (!user) return <Navigate to="/login" replace />;
-
-  // Actualiza un campo del formulario cuando el usuario escribe
+  
   function handleInput(e) {
     const { name, value } = e.target;
     setOngForm(prev => ({ ...prev, [name]: value }));
   }
-
-  // Abre el modo edición cargando los datos más recientes (por si hubo cambios externos)
+  
   function abrirEdicion() {
     setOngForm(getDatosActuales());
     setEditando(true);
   }
-
-  // Guarda la foto y actualiza el usuario
+  
   function guardarFoto(url) {
     setFotoUrl(url);
     if (onUpdateUser) onUpdateUser({ ...user, photoUrl: url });
   }
-
-  // Guarda los cambios del formulario
+  
   function guardarPerfil() {
     const updatedUser = {
       ...user,
@@ -88,15 +55,13 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
     if (onUpdateUser) onUpdateUser(updatedUser);
     setEditando(false);
   }
-
-  // Datos que se muestran en modo vista (los del formulario si está editando, o los guardados)
+  
   const datos = getDatosActuales();
 
   return (
     <div className="profile-dashboard">
       <h1 className="profile-page-title">Perfil ONG</h1>
-
-      {/* ── Banner y avatar ── */}
+      
       <div className="profile-hero">
         <div
           className="profile-banner"
@@ -123,24 +88,20 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
           </div>
         </div>
       </div>
-
-      {/* Modal para cambiar la foto */}
+      
       <ProfilePhotoModal
         isOpen={showPhotoModal}
         initialUrl={fotoUrl}
         onClose={() => setShowPhotoModal(false)}
         onSave={(url) => { guardarFoto(url); setShowPhotoModal(false); }}
       />
-
-      {/* ── Sección de información ── */}
+      
       <div className="dashboard-section">
         <h3>Información de la ONG</h3>
-
-        {/* MODO VISTA */}
+        
         {!editando && (
           <div className="ong-profile-card">
-
-            {/* Cabecera: emoji + nombre + ubicación */}
+            
             <div className="ong-profile-header">
               <div className="ong-profile-emoji-badge" style={{ backgroundColor: datos.color }}>
                 {datos.emoji}
@@ -150,8 +111,7 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
                 <p className="ong-profile-location">📍 {datos.location || 'Ubicación no registrada'}</p>
               </div>
             </div>
-
-            {/* Cuerpo: descripción y misión */}
+            
             <div className="ong-profile-body">
               {datos.desc && (
                 <div>
@@ -166,8 +126,7 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
                 </div>
               )}
             </div>
-
-            {/* Contacto: correo, teléfono, web */}
+            
             <div className="ong-profile-contacts">
               <div className="ong-profile-contact-item">
                 <span className="ong-profile-contact-label">📧 Correo</span>
@@ -182,19 +141,16 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
                 <span className="ong-profile-contact-value">{datos.web || '—'}</span>
               </div>
             </div>
-
-            {/* Botón de editar al fondo */}
+            
             <button className="ong-profile-edit-btn" onClick={abrirEdicion}>
               ✏️ Editar perfil ONG
             </button>
           </div>
         )}
-
-        {/* MODO EDICIÓN */}
+        
         {editando && (
           <div className="ong-edit-form">
-
-            {/* Nombre (campo completo) */}
+            
             <label>
               Nombre de la ONG
               <input
@@ -206,7 +162,7 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
               />
             </label>
 
-            {/* Ubicación y Emoji en la misma fila */}
+
             <div className="ong-edit-form-row">
               <label>
                 Ubicación
@@ -230,7 +186,6 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
               </label>
             </div>
 
-            {/* Descripción */}
             <label>
               Descripción breve
               <textarea
@@ -242,7 +197,6 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
               />
             </label>
 
-            {/* Misión */}
             <label>
               Misión
               <textarea
@@ -254,7 +208,6 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
               />
             </label>
 
-            {/* Correo, Teléfono y Web en la misma fila */}
             <div className="ong-edit-form-row-3">
               <label>
                 Correo
@@ -287,8 +240,7 @@ export default function ProfileOngScreen({ user, onUpdateUser }) {
                 />
               </label>
             </div>
-
-            {/* Botones */}
+        
             <div className="profile-action-row">
               <button className="action-btn-primary" onClick={guardarPerfil}>
                 Guardar cambios

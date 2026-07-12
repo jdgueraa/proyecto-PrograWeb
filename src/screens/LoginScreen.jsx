@@ -7,9 +7,9 @@ export default function LoginScreen({ onLogin }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  async function handleLogin() {
+  function handleLogin() {
     setError('');
-    const errorMessage = await onLogin(email, password);
+    const errorMessage = onLogin(email, password);
     if (errorMessage) {
       setError(errorMessage);
       return;
@@ -63,7 +63,7 @@ export default function LoginScreen({ onLogin }) {
           ¿No tienes cuenta? Regístrate
         </button>
       </div>
- 
+
     </div>
   );
 }

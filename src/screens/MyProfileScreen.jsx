@@ -15,7 +15,7 @@ export default function MyProfileScreen({ user, onUpdateUser, onCreditsChange })
     const [showPhotoModal, setShowPhotoModal] = useState(false);
     const [photoInput, setPhotoInput] = useState('');
 
-    function saveProfilePhoto(na,bio,url) {
+    function saveProfile(na,bio,url) {
         setFotoUrl(url);
         onUpdateUser({ fullName: na, biografia: bio, photoUrl: url });
     }
@@ -123,7 +123,7 @@ export default function MyProfileScreen({ user, onUpdateUser, onCreditsChange })
                 initialUrl={photoInput}
                 onClose={() => setShowPhotoModal(false)}
                 onSave={(na, bio, url) => {
-                    saveProfilePhoto(na,bio,url);
+                    saveProfile(na,bio,url);
                     setShowPhotoModal(false);
                 }}
             />
